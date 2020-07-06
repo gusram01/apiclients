@@ -1,26 +1,23 @@
 import express from 'express';
 import helmet from 'helmet';
-import mongoose, { Error } from 'mongoose';
 import path from 'path';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import errorHandler from './middleware/error.Handler';
-import Login from './classes/routes/login.routes';
-import Signup from './classes/routes/register.routes';
-// import { accessMiddle } from './middleware/auth';
-
+import indexRoutes from './index.routes';
+import DataBase from './database';
+import { ErrorResponse } from './middleware/errorResponse';
 
 export default class App {
   protected app: express.Application;
   protected port: number;
   protected publicPath = path.resolve(__dirname, '../public');
 
-  constructor(puerto: number) {
-    this.port = +process.env.PORT! || puerto;
+  constructor(port: number) {
+    this.port = +process.env.PORT! || port;
     this.app = express();
     this.intermediarios();
     this.routes();
-    this.app.use(errorHandler);
+    this.app.use(ErrorResponse.errHandler);
   }
 
   private intermediarios() {
@@ -32,35 +29,21 @@ export default class App {
 
   private routes() {
     this.app.use('/', express.static(this.publicPath));
-    this.app.use('/api/signup', Signup);
-    this.app.use('/api/login', Login);
+    this.app.use('/api', indexRoutes);
   }
 
-  private async mongDb() {
-    try {
-      const respuesta = await mongoose.connect(process.env.MONGO_URL!, {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useUnifiedTopology: true,
-        useFindAndModify: false
-      });
-      return respuesta;
-    } catch (err) {
-      throw new Error('Error on mongoose.connect: ' + err);
-    }
+  private connectDB() {
+    DataBase.connect()
+      .then(() => console.log('DB online'))
+      .catch(console.log);
   }
 
-  public static init(puerto: number) { return new App(puerto) }
+  public static init(port: number) { return new App(port) }
 
-  public async start() {
-    try {
-      await this.app.listen(this.port);
-      console.log('Server listening on port ', this.port);
-      await this.mongDb();
-      console.log('Base de datos online');
-    } catch (err) {
-      return console.warn(err);
-    }
+  public start() {
+    this.connectDB();
+    this.app.listen(this.port, () =>
+      console.log('Server listening on port ', this.port));
   }
 
 }
