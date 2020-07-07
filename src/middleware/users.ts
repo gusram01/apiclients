@@ -4,6 +4,8 @@ import crypto from 'crypto';
 import { NextFunction, Request } from 'express';
 import { err400 } from '../middleware/errorResponse';
 import User from '../models/users';
+import Mailer from './mailjet';
+import { ErrorResponse } from './errorResponse';
 
 
 export default class UserMiddleware {
@@ -56,6 +58,30 @@ export default class UserMiddleware {
 
   }
 
+  static async findTokenTemporal(token: string, next: NextFunction) {
+
+    try {
+      const doc = await User.findOne({ resetPassword: token });
+      if (!doc) throw next(new ErrorResponse(403, 'The request expires'));
+
+      const now = new Date(Date.now());
+
+      if (!doc.resetPaswordExpire) {
+        await doc.set('resetPassword', undefined).save();
+        await doc.set('resetPaswordExpire', undefined).save();
+        throw next(new ErrorResponse(403, 'Token expires'));
+      }
+      if (doc.resetPaswordExpire < now) {
+        await doc.set('resetPassword', undefined).save();
+        await doc.set('resetPaswordExpire', undefined).save();
+        throw next(new ErrorResponse(403, 'Token expires'));
+      }
+      return doc;
+
+    } catch (error) { throw next(error) }
+
+  }
+
 
   static async getTokenTemporal(email: string, next: NextFunction) {
     try {
@@ -72,7 +98,15 @@ export default class UserMiddleware {
         resetPaswordExpire: expireTokenTemporal
       }).save();
 
-      return newToken;
+      const request = Mailer.sendEmail(email, tokenTemporal);
+
+      request.then((result: Request) => {
+        console.log(result.body)
+        return newToken;
+      })
+        .catch(console.log);
+
+
 
     } catch (error) { throw next(error) }
 

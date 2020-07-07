@@ -1,5 +1,5 @@
 import { Response, Request, Router, NextFunction, CookieOptions } from 'express';
-import { err403, err400 } from '../middleware/errorResponse';
+import { err403, err400, ErrorResponse } from '../middleware/errorResponse';
 import UserMiddleware from '../middleware/users';
 
 
@@ -32,6 +32,21 @@ class Login {
 
   }
 
+  private validateTokenTemporal(
+    req: Request,
+    res: Response,
+    next: NextFunction) {
+
+    const tokenTemporal = req.params.tokenTemporal;
+
+    UserMiddleware.findTokenTemporal(tokenTemporal, next)
+      .then(data => {
+        return res.send(`<h1>ok ${data}, continue</h1>`);
+      })
+      .catch(next)
+
+  }
+
   private login(
     req: Request,
     res: Response,
@@ -58,7 +73,7 @@ class Login {
 
   }
 
-  private forgotPass(
+  private forgotPassword(
     req: Request,
     res: Response,
     next: NextFunction
@@ -78,9 +93,33 @@ class Login {
 
   }
 
+  private async newPassword(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const { password } = req.body;
+    const tokenTemporal = req.params.tokenTemporal;
+
+    try {
+      const doc = await UserMiddleware.findTokenTemporal(tokenTemporal, next);
+      const encryptPassword = await UserMiddleware.encrypter(password)
+      await doc.set('password', encryptPassword).save();
+      await doc.set('resetPassword', undefined).save();
+      await doc.set('resetPaswordExpire', undefined).save();
+      return res.status(200)
+        .json({ ok: true, message: 'Password updated' });
+
+    } catch (error) { throw next(error) }
+
+  }
+
+
   private routesUsers(): void {
     this.router.post('/', this.validateReq, this.login);
-    this.router.post('/newpassword', this.validateReqNewPassword, this.forgotPass);
+    this.router.post('/newpassword', this.validateReqNewPassword, this.forgotPassword);
+    this.router.get('/newpassword/:tokenTemporal', this.validateTokenTemporal);
+    this.router.put('/newpassword/:tokenTemporal', this.newPassword);
   }
 
 }
