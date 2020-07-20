@@ -7,7 +7,7 @@
     "tsc": "tsc -w",
     "dev": "nodemon dist/server",
     "build": "tsc",
-    "start": "tsc && node dist/server"
+    "start": "node dist/server"
   },
   "keywords": [
     "tsc",
