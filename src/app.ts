@@ -1,6 +1,5 @@
 import express from 'express';
 import helmet from 'helmet';
-import path from 'path';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import indexRoutes from './index.routes';
@@ -10,7 +9,7 @@ import { ErrorResponse } from './middleware/errorResponse';
 export default class App {
   protected app: express.Application;
   protected port: number;
-  protected publicPath = path.resolve(__dirname, '../public');
+
 
   constructor(port: number) {
     this.port = +process.env.PORT! || port;
@@ -28,7 +27,7 @@ export default class App {
   }
 
   private routes() {
-    this.app.use('/', express.static(this.publicPath));
+    this.app.use(express.static(__dirname + '/public'));
     this.app.use('/api', indexRoutes);
   }
 
