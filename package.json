@@ -32,7 +32,7 @@
     "node-mailjet": "^3.3.1",
     "rxjs": "^6.5.5",
     "slugify": "^1.4.0",
-    "typescript": "^3.9.5"
+    "typescript": "^3.9.7"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.2",
