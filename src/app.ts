@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import indexRoutes from './index.routes';
 import connect from './database';
 import { ErrorResponse } from './middleware/errorResponse';
+import path from 'path';
 
 const app = express();
 
@@ -16,7 +17,7 @@ app.use(cors());
 app.use(cookieParser());
 
 // Routes
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(path.join(__dirname, '..', '/public')));
 app.use('/', indexRoutes);
 
 // template engine

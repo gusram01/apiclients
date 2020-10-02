@@ -15,6 +15,25 @@ import {
   getTokenTemporal,
 } from '../middleware/users';
 
+if (process.env.NODE_ENV !== 'production') {
+  const webpack = require('webpack');
+
+  const compiler = webpack(require('../../config/webpack.config.dev.js'));
+  const watching = compiler.watch(
+    {
+      // Example watchOptions
+      aggregateTimeout: 300,
+      poll: undefined,
+    },
+    (err: any, stats: any) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      console.log(stats.toJson('minimal'));
+    }
+  );
+}
 const router = Router();
 
 const validateReq = (req: Request, res: Response, next: NextFunction) => {
