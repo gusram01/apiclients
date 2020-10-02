@@ -3,46 +3,32 @@ import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import indexRoutes from './index.routes';
-import DataBase from './database';
+import connect from './database';
 import { ErrorResponse } from './middleware/errorResponse';
 
-export default class App {
-  protected app: express.Application;
-  protected port: number;
+const app = express();
 
+// middleware
+app.use(helmet());
+app.use(express.json());
+app.use(express.urlencoded());
+app.use(cors());
+app.use(cookieParser());
 
-  constructor(port: number) {
-    this.port = +process.env.PORT! || port;
-    this.app = express();
-    this.intermediarios();
-    this.routes();
-    this.app.use(ErrorResponse.errHandler);
-  }
+// Routes
+app.use(express.static(__dirname + '/public'));
+app.use('/', indexRoutes);
 
-  private intermediarios() {
-    this.app.use(helmet());
-    this.app.use(express.json());
-    this.app.use(cors());
-    this.app.use(cookieParser());
-  }
+// template engine
+app.set('views', './views');
+app.set('view engine', 'pug');
 
-  private routes() {
-    this.app.use(express.static(__dirname + '/public'));
-    this.app.use('/api', indexRoutes);
-  }
+// Error handler
+app.use(ErrorResponse.errHandler);
 
-  private connectDB() {
-    DataBase.connect()
-      .then(() => console.log('DB online'))
-      .catch(console.log);
-  }
+// Database
+connect()
+  .then(() => console.log('DB online'))
+  .catch(console.log);
 
-  public static init(port: number) { return new App(port) }
-
-  public start() {
-    this.connectDB();
-    this.app.listen(this.port, () =>
-      console.log('Server listening on port ', this.port));
-  }
-
-}
+export default app;

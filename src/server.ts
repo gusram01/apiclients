@@ -1,12 +1,8 @@
+import app from './app';
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
-import App from './app';
 
+const port = process.env.PORT! || 3000;
 
-const server = App.init(3000);
-
-server.start();
-
-
-
+app.listen(port, () => console.log(`Server listening on port: ${port}`));

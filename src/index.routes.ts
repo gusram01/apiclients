@@ -1,24 +1,12 @@
 import { Router } from 'express';
 import signup from './routes/signup';
 import login from './routes/login';
+import init from './routes/init';
 
-class IndexRoutes {
+const router = Router();
 
-  router: Router;
+router.use('/', init);
+router.use('/api/signup', signup);
+router.use('/api/login', login);
 
-  constructor() {
-    this.router = Router();
-    this.indexRoutes();
-  }
-
-  private indexRoutes() {
-    this.router.use('/signup', signup);
-    this.router.use('/login', login);
-  }
-
-}
-
-const indexRoutes = new IndexRoutes();
-
-export default indexRoutes.router;
-
+export default router;
