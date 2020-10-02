@@ -15,26 +15,28 @@ import {
   getTokenTemporal,
 } from '../middleware/users';
 
-interface Params {
-  req: Request;
-  res: Response;
-  next: NextFunction;
-}
-
 const router = Router();
 
-const validateReq = ({ req, res, next }: Params) => {
+const validateReq = (req: Request, res: Response, next: NextFunction) => {
   if (!req.body.email || !req.body.password) return next(err400);
   if (req.body.password.length < 6) return next(err400);
   return next();
 };
 
-const validateReqNewPassword = ({ req, res, next }: Params) => {
+const validateReqNewPassword = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (!req.body.email) return next(err400);
   return next();
 };
 
-const validateTokenTemporal = ({ req, res, next }: Params) => {
+const validateTokenTemporal = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const tokenTemporal = req.params.tokenTemporal;
 
   findTokenTemporal(tokenTemporal, next)
@@ -44,7 +46,7 @@ const validateTokenTemporal = ({ req, res, next }: Params) => {
     .catch(next);
 };
 
-const login = ({ req, res, next }: Params) => {
+const login = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
   const cookieOptions: CookieOptions = {
     expires: new Date(Date.now() + +process.env.EXPIN_COOKIEP!),
@@ -62,14 +64,15 @@ const login = ({ req, res, next }: Params) => {
         message: 'Cool!! you are in!!',
       });
 
-      // res.status(200)
+      // return res
+      //   .status(200)
       //   .cookie('token', token, cookieOptions)
       //   .json({ ok: true, data: token });
     })
     .catch(next);
 };
 
-const forgotPassword = ({ req, res, next }: Params) => {
+const forgotPassword = (req: Request, res: Response, next: NextFunction) => {
   const { email } = req.body;
 
   getTokenTemporal(email, next)
@@ -83,7 +86,7 @@ const forgotPassword = ({ req, res, next }: Params) => {
     .catch(next);
 };
 
-const newPassword = async ({ req, res, next }: Params) => {
+const newPassword = async (req: Request, res: Response, next: NextFunction) => {
   const { password } = req.body;
   const tokenTemporal = req.params.tokenTemporal;
 
