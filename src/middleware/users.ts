@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import { NextFunction, Request } from 'express';
 import { err400 } from '../middleware/errorResponse';
 import User from '../models/users';
-import Mailer from './mailjet';
 import { ErrorResponse } from './errorResponse';
 
 const encrypter = async (password: string) => {
@@ -82,7 +81,7 @@ const findTokenTemporal = async (token: string, next: NextFunction) => {
 const getTokenTemporal = async (email: string, next: NextFunction) => {
   try {
     const doc = await User.findOne({ email: email }).select('password');
-    if (!doc) throw next(err400);
+    if (!doc) return { ok: false, token: '' };
 
     const newToken = crypto.randomBytes(20).toString('hex');
     const tokenTemporal = crypto
@@ -98,14 +97,7 @@ const getTokenTemporal = async (email: string, next: NextFunction) => {
       })
       .save();
 
-    const request = Mailer.sendEmail(email, tokenTemporal);
-
-    request
-      .then((result: Request) => {
-        console.log(result.body);
-        return newToken;
-      })
-      .catch(console.log);
+    return { ok: true, token: newToken };
   } catch (error) {
     throw next(error);
   }

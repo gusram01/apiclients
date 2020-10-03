@@ -4,13 +4,15 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
   mode: 'development',
   entry: {
-    app: './src/frontend/index.ts',
+    home: './src/frontend/home/index.ts',
+    app: './src/frontend/app/index.ts',
+    help: './src/frontend/help/index.ts',
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: 'src/js/main.js',
+    filename: 'src/js/[name]/main.js',
     path: path.resolve(__dirname, '..', 'public'),
     publicPath: '/',
   },
@@ -39,6 +41,46 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
+      },
+
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: '/assets',
+              publicPath: '/assets',
+              emitFile: true,
+            },
+          },
+          {
+            loader: 'image-webpack-loader',
+            options: {
+              // bypassOnDebug: true, // webpack@1.x
+              // disable: true, // webpack@2.x and newer
+              mozjpeg: {
+                progressive: true,
+                quality: 65,
+              },
+              // optipng.enabled: false will disable optipng
+              optipng: {
+                enabled: false,
+              },
+              pngquant: {
+                quality: [0.65, 0.9],
+                speed: 4,
+              },
+              gifsicle: {
+                interlaced: false,
+              },
+              // the webp option will enable WEBP
+              webp: {
+                quality: 75,
+              },
+            },
+          },
+        ],
       },
     ],
   },

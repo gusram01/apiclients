@@ -1,17 +1,32 @@
+
 <!DOCTYPE html>
 html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title= title
-  body 
-    h1= message
-    form(action="/api/login", method="post")
-      .form__item
-        label(for="email") Email
-        input(type="email", name="email" id="email" placeholder="some@email.com" aria-label="email-input" autocomplete="email" required)
-      .form__item
-        label(for="password") Password
-        input(type="password", name="password" id="password"  aria-label="password-input" autocomplete="password" required)
-      .form__item
-        button(type="submit") LogIn
+    link(rel="stylesheet", href="/src/css/home/main.css")
+  body#global
+    include templates/header.pug
+    main.main
+      h1= message
+      .form__container#modal__container
+        form(id="form__index" class="form")
+          .form__item
+            input(type="email", name="email" id="email" placeholder="some@email.com" aria-label="email" autocomplete="email" required)
+            label(for="email") Email
+          .form__item#item-password
+            input(type="password", name="password" id="password" placeholder="password" aria-label="password-input" autocomplete="password")
+            label(for="password") Password
+          .form__item#item-verify
+            input(type="password", name="password-verify" id="password-verify" placeholder="confirm password" aria-label="password-verify")
+            label(for="password-verify") Confirm
+          .form__item.form__more
+            span.more 
+              a(href="#" class="link" id="forgot") Forgot password
+            span.more 
+              a(href="#" class="link" id="login") Log in
+          .form__item
+            button(type="submit" class="button" id="form-button") Sign Up
+    
+    script(src="/src/js/home/main.js")

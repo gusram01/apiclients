@@ -17,13 +17,15 @@ function recursiveIssuer(m) {
 module.exports = {
   mode: 'production',
   entry: {
-    app: './src/frontend/index.ts',
+    home: './src/frontend/home/index.ts',
+    app: './src/frontend/app/index.ts',
+    help: './src/frontend/help/index.ts',
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
   output: {
-    filename: 'src/js/main.js',
+    filename: 'src/js/[name]/main.js',
     path: path.resolve(__dirname, '..', 'public'),
     publicPath: '/',
   },
@@ -37,8 +39,22 @@ module.exports = {
     minimizer: [new TerserJSPlugin({}), new OptimizeCSSAssetsPlugin({})],
     splitChunks: {
       cacheGroups: {
+        homeStyles: {
+          name: 'home',
+          test: (m, c, entry = 'home') =>
+            m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
+          chunks: 'all',
+          enforce: true,
+        },
         appStyles: {
           name: 'app',
+          test: (m, c, entry = 'home') =>
+            m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
+          chunks: 'all',
+          enforce: true,
+        },
+        helpStyles: {
+          name: 'help',
           test: (m, c, entry = 'home') =>
             m.constructor.name === 'CssModule' && recursiveIssuer(m) === entry,
           chunks: 'all',
@@ -49,7 +65,7 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(),
-    new MiniCssExtractPlugin({ filename: 'src/css/main.css' }),
+    new MiniCssExtractPlugin({ filename: 'src/css/[name]/main.css' }),
   ],
   module: {
     rules: [
@@ -68,45 +84,45 @@ module.exports = {
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
 
-      // {
-      //   test: /\.(png|svg|jpg|gif)$/,
-      //   use: [
-      //     {
-      //       loader: 'file-loader',
-      //       options: {
-      //         outputPath: '/assets/img',
-      //         publicPath: '/assets/img',
-      //         emitFile: true
-      //       }
-      //     },
-      //     {
-      //       loader: 'image-webpack-loader',
-      //       options: {
-      //         // bypassOnDebug: true, // webpack@1.x
-      //         // disable: true, // webpack@2.x and newer
-      //         mozjpeg: {
-      //           progressive: true,
-      //           quality: 65
-      //         },
-      //         // optipng.enabled: false will disable optipng
-      //         optipng: {
-      //           enabled: false,
-      //         },
-      //         pngquant: {
-      //           quality: [ 0.65, 0.90 ],
-      //           speed: 4
-      //         },
-      //         gifsicle: {
-      //           interlaced: false,
-      //         },
-      //         // the webp option will enable WEBP
-      //         webp: {
-      //           quality: 75
-      //         }
-      //       },
-      //     },
-      //   ]
-      // },
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: '/assets',
+              publicPath: '/assets',
+              emitFile: true,
+            },
+          },
+          {
+            loader: 'image-webpack-loader',
+            options: {
+              // bypassOnDebug: true, // webpack@1.x
+              // disable: true, // webpack@2.x and newer
+              mozjpeg: {
+                progressive: true,
+                quality: 65,
+              },
+              // optipng.enabled: false will disable optipng
+              optipng: {
+                enabled: false,
+              },
+              pngquant: {
+                quality: [0.65, 0.9],
+                speed: 4,
+              },
+              gifsicle: {
+                interlaced: false,
+              },
+              // the webp option will enable WEBP
+              webp: {
+                quality: 75,
+              },
+            },
+          },
+        ],
+      },
     ],
   },
 };
