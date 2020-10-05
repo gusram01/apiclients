@@ -12,7 +12,7 @@ const renderIndex = (req: Request, res: Response, next: NextFunction) => {
   } else {
     return res.render('app', {
       title: 'Init page',
-      message: 'Cool!! you are in!!',
+      message: 'Cool!! you are in!! the token was installed',
     });
   }
 };
