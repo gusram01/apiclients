@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "tsnd src/server",
     "prebuild": "webpack --config config/webpack.config.prod.js",
-    "build": "tsc",
+    "build": "set NODE_ENV=production && tsc",
     "postbuild": "postcss public/src/css/**/*.css --use autoprefixer --no-map -r",
     "start": "node dist/server"
   },

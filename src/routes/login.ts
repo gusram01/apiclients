@@ -1,4 +1,5 @@
 import { err403, err400, ErrorResponse } from '../middleware/errorResponse';
+import signupLogin from '../middleware/signupLogin';
 import {
   Response,
   Request,
@@ -15,39 +16,10 @@ import {
   getTokenTemporal,
 } from '../middleware/users';
 
-// Implementing Webpack for development build frontend js/css
-if (process.env.NODE_ENV !== 'production') {
-  const webpack = require('webpack');
-
-  const compiler = webpack(require('../../config/webpack.config.dev.js'));
-  const watching = compiler.watch(
-    {
-      // Example watchOptions
-      aggregateTimeout: 300,
-      poll: undefined,
-    },
-    (err: any, stats: any) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      console.log(stats.toJson('minimal'));
-    }
-  );
-}
-// Implementing Webpack for development build frontend js/css
-
 const router = Router();
 
 const validateReq = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.body.email || !req.body.password) return next(err400);
-  if (req.body.email.length > 6 && req.body.email.length < 47) {
-    return next(err400);
-  }
-  if (req.body.password.length > 6 && req.body.password.length < 47) {
-    return next(err400);
-  }
-  return next();
+  signupLogin(req, next);
 };
 
 const validateReqNewPassword = (

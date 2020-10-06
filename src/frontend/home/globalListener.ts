@@ -34,6 +34,23 @@ const clickListener = (e: Event) => {
 
 const submitListener = (e: Event) => {
   e.preventDefault();
+  const element = e.target as HTMLFormElement;
+  const { email, password, passverify } = element;
+  const body = JSON.stringify({
+    email: email.value,
+    password: password.value,
+    passverify: passverify.value,
+  });
+  const myHeaders = new Headers();
+  myHeaders.append('Content-type', 'application/json');
+
+  fetch('/api/login', {
+    method: 'POST',
+    headers: myHeaders,
+    body: body,
+  })
+    .then((data: any) => location.assign('/'))
+    .catch((e) => console.log('error: ', e));
 };
 
 export { clickListener, submitListener };
