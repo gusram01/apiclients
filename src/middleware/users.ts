@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { NextFunction, Request } from 'express';
 import { err400 } from '../middleware/errorResponse';
-import User from '../models/users';
+import User from '../store/models/users';
 import { ErrorResponse } from './errorResponse';
 
 const encrypter = async (password: string) => {

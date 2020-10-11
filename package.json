@@ -5,9 +5,9 @@
   "main": "server.js",
   "license": "MIT",
   "scripts": {
-    "dev": "tsnd src/server",
+    "dev": "tsnd src/server/server",
     "build": "set NODE_ENV=production && tsc",
-    "start": "node dist/server"
+    "start": "node dist/server/server"
   },
   "keywords": [
     "tsc",

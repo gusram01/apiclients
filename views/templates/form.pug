@@ -1,0 +1,12 @@
+form.form(action="/api/signup" method="POST")
+  .form__item
+    input(type="email", name="email" id="email" placeholder="some@email.com" aria-label="email" autocomplete="email" required)
+    label(for="email") Email
+  .form__item#item-password
+    input(type="password", name="password" id="password" placeholder="password" aria-label="password-input" autocomplete="password")
+    label(for="password") Password
+  .form__item#item-verify
+    input(type="", name="confirm" id="confirm" placeholder="confirm password" aria-label="confirm-password")
+    label(for="confirm") Confirm
+  .form__item
+    button(type="submit" class="button" id="form-button") Sign Up
