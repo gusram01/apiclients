@@ -15,7 +15,10 @@ const userSchema = new Schema<Users>({
     default: new Date().getTime(),
   },
   delete: Date,
-  born: Date,
+  nick: {
+    type: String,
+    maxlength: [38, 'nickName max length: 38 char'],
+  },
   firstname: {
     type: String,
     maxlength: [38, 'Fisrt Name max length: 38 char'],

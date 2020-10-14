@@ -1,5 +1,8 @@
 form.form(action="/api/signup" method="POST")
   .form__item
+    input(type="text", name="nick" id="nick" placeholder="some@email.com" aria-label="nickname" autocomplete="Nick Name" required)
+    label(for="nick") Nickname
+  .form__item
     input(type="email", name="email" id="email" placeholder="some@email.com" aria-label="email" autocomplete="email" required)
     label(for="email") Email
   .form__item#item-password

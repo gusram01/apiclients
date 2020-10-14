@@ -1,26 +1,18 @@
 import { Router, RequestHandler } from 'express';
-import { EventEmitter } from 'events';
 
-const myEmitter = new EventEmitter();
-
-// First listener
-myEmitter.on('event', function firstListener() {
-  console.log('Helloooo! first listener');
-});
-
-console.log(myEmitter.listeners('event'));
 const router = Router();
 
-const renderIndex: RequestHandler = (req, res, next) => {
-  if (req.path === '/') {
-    myEmitter.emit('event', 1);
-  }
-  return res.render('index', {
-    title: 'Home Page',
-    message: 'Cool!! you are in!!',
+const homePage: RequestHandler = (req, res, next) => {
+  return res.render('index');
+};
+
+const signUp: RequestHandler = (req, res, next) => {
+  return res.render('signup', {
+    title: 'Sign Up Page',
   });
 };
 
-router.get('/', renderIndex);
+router.get('/', homePage);
+router.get('/signup', signUp);
 
 export default router;

@@ -6,7 +6,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const connect = async () => {
   try {
-    return await mongoose.connect(process.env.MONGO_URL!, {
+    return await mongoose.connect(process.env.MONGO_DEV!, {
       useNewUrlParser: true,
       useCreateIndex: true,
       useUnifiedTopology: true,

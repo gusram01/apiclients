@@ -1,5 +1,6 @@
 import { Error } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
+import { errorResponse } from '../network/response';
 
 export class ErrorResponse extends Error {
   statusCode: number;
@@ -24,7 +25,7 @@ export class ErrorResponse extends Error {
     console.log(err);
 
     if (err.name === 'CastError') {
-      error = err404;
+      error = new ErrorResponse(404, `Item not found`);
     }
 
     if (err.name === 'ValidationError') {
@@ -36,16 +37,6 @@ export class ErrorResponse extends Error {
       error = new ErrorResponse(400, messages.join(' '));
     }
 
-    return res
-      .status(error.statusCode)
-      .json({ ok: false, error: error.message });
+    return errorResponse(err, res);
   }
 }
-
-const err500 = new ErrorResponse(500, `Server Error`);
-const err404Id = new ErrorResponse(404, `Id not found`);
-const err404 = new ErrorResponse(404, `Item not found`);
-const err403 = new ErrorResponse(403, `Bad credentials`);
-const err400 = new ErrorResponse(400, `Please verify your request`);
-
-export { err500, err404, err404Id, err403, err400 };

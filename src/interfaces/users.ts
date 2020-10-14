@@ -1,17 +1,16 @@
 import { Document } from 'mongoose';
 
 export interface Users extends Document {
-  create: Date;
-  delete: Date;
-  born: Date;
-  firstname: string;
-  lastname: string;
-  phone: string;
-  email: string | undefined;
+  nick: string;
+  email: string;
   password: string;
-  category: string;
-  state: Boolean;
-  resetPassword: string | undefined;
-  resetPaswordExpire: Date | undefined;
-
+  firstname?: string;
+  lastname?: string;
+  create?: Date;
+  delete?: Date;
+  phone?: string;
+  category?: string;
+  state?: Boolean;
+  resetPassword?: string | undefined;
+  resetPaswordExpire?: Date | undefined;
 }

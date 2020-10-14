@@ -1,4 +1,5 @@
 import { Response, Request } from 'express';
+import { ErrorResponse } from '../middleware/errorResponse';
 
 const successResponse = (
   req: Request,
@@ -7,11 +8,7 @@ const successResponse = (
   status = 200
 ) => res.status(status).json({ ok: true, data: dataResponse });
 
-const errorResponse = (
-  req: Request,
-  res: Response,
-  message = 'Internal Server Error',
-  status = 500
-) => res.status(status).json({ ok: false, error: message });
+const errorResponse = (err: ErrorResponse, res: Response) =>
+  res.status(err.statusCode).json({ ok: false, error: err.message });
 
 export { successResponse, errorResponse };
