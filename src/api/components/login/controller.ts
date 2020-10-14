@@ -5,7 +5,7 @@ import { NextFunction, Request, RequestHandler } from 'express';
 import { err400 } from '../../../middleware/errorResponse';
 import { ErrorResponse } from '../../../middleware/errorResponse';
 import mongoose, { Mongoose } from 'mongoose';
-import { Users } from '../../../interfaces/users';
+import { Users } from '../users/users.interface';
 import { Error } from 'mongoose';
 
 const Controller = (injectedModel: mongoose.Model<Users>) => {

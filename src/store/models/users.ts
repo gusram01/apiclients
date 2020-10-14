@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
-import { Users } from '../../interfaces/users';
+import { Users } from '../../api/components/users/users.interface';
 
 const categoryUsers: { values: string[]; message: string } = {
   values: ['ADMIN', 'USER'],
@@ -61,12 +61,18 @@ const userSchema = new Schema<Users>({
 
 userSchema.set('toObject', {
   transform: function (doc, ret, options) {
-    if (doc.category === 'CIENT') delete ret.category;
-    delete ret.resetPassword;
-    delete ret.resetPaswordExpire;
-    delete ret.password;
-    delete ret.state;
-    return ret;
+    if (doc.category === 'CLIENT') {
+      delete ret.category;
+      delete ret.resetPassword;
+      delete ret.resetPaswordExpire;
+      delete ret.password;
+      delete ret.state;
+      delete ret.delete;
+      delete ret.create;
+      delete ret.firstname;
+      delete ret.lastname;
+      return ret;
+    }
   },
 });
 

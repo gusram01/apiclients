@@ -1,5 +1,5 @@
 import Controller from './index';
-import { RequestHandler, Router, CookieOptions } from 'express';
+import { RequestHandler, Router } from 'express';
 import { successResponse } from '../../../network/response';
 
 const router = Router();
@@ -11,30 +11,25 @@ const list: RequestHandler = async (req, res, next) => {
 };
 
 const one: RequestHandler = (req, res, next) => {
-  const id = req.params.id;
-  Controller.getOne(id)
+  Controller.getOne(req.params.id)
     .then((data: any) => successResponse(req, res, data, 200))
     .catch(next);
 };
 
 const newOne: RequestHandler = (req, res, next) => {
-  const body = req.body;
-  Controller.postOne(body, next)
+  Controller.postOne(req.body)
     .then((data: any) => successResponse(req, res, data, 201))
     .catch(next);
 };
 
 const update: RequestHandler = (req, res, next) => {
-  const id = req.params.id;
-  const body = req.body;
-  Controller.updateOne(id, body)
+  Controller.updateOne(req.params.id, req.body)
     .then((data: any) => successResponse(req, res, data, 200))
     .catch(next);
 };
 
 const removeOne: RequestHandler = (req, res, next) => {
-  const id = req.params.id;
-  Controller.delOne(id)
+  Controller.delOne(req.params.id)
     .then((data: any) =>
       successResponse(req, res, { data, message: 'User erased' }, 200)
     )

@@ -4,8 +4,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import indexRoutes from './index.routes';
-import connect from '../store/database';
-import { ErrorResponse } from '../middleware/errorResponse';
+import { errorHandler } from '../network/response';
+// import { ErrorResponse } from '../middleware/errorResponse';
 
 const app = express();
 
@@ -25,11 +25,6 @@ app.set('views', './views');
 app.set('view engine', 'pug');
 
 // Error handler
-app.use(ErrorResponse.errHandler);
-
-// Database
-connect()
-  .then(() => console.log('DB online'))
-  .catch(console.log);
+app.use(errorHandler);
 
 export default app;
