@@ -1,40 +1,26 @@
-// import signupLogin from '../../../middleware/signupLogin';
-// import { RequestHandler, Router, CookieOptions } from 'express';
-// import Controller from './index';
-// import { err400 } from '../../../middleware/errorResponse';
-// import { errorResponse, successResponse } from '../../../network/response';
+import { RequestHandler, Router, CookieOptions } from 'express';
+import { successResponse } from '../../../network/response';
+import Controller from './index';
 
-// const router = Router();
+const router = Router();
 
-// const validateReq: RequestHandler = (req, res, next) => {
-//   signupLogin(req, next);
-// };
+const login: RequestHandler = (req, res, next) => {
+  Controller.login(req.body)
+    .then((data: any) => successResponse(req, res, data, 200, true))
+    .catch(next);
+};
+router.post('/', login);
+// router.post('/newpassword', forgotPassword);
+// router.get('/newpassword/:tokenTemporal', validateTokenTemporal);
+// router.put('/newpassword/:tokenTemporal', newPassword);
 
+export default router;
 // const validateTokenTemporal: RequestHandler = (req, res, next) => {
 //   const tokenTemporal = req.params.tokenTemporal;
 
 //   Controller.findTokenTemporal(tokenTemporal, next)
 //     .then((data) => {
 //       return res.send(`<h1>ok ${data}, continue</h1>`);
-//     })
-//     .catch(next);
-// };
-
-// const login: RequestHandler = (req, res, next) => {
-//   const { email, password } = req.body;
-//   const cookieOptions: CookieOptions = {
-//     expires: new Date(Date.now() + +process.env.EXPIN_COOKIEP!),
-//     httpOnly: true,
-//   };
-
-//   Controller.validatePassword(email, password, next)
-//     .then((id) => {
-//       if (!id) throw next(new Error('error '));
-
-//       const token = Controller.getToken(id);
-//       return res
-//         .cookie('token', token, cookieOptions)
-//         .json({ ok: true, data: token });
 //     })
 //     .catch(next);
 // };
@@ -71,10 +57,3 @@
 //   if (req.body.password.length < 6) return next(err400);
 //   return next();
 // };
-
-// router.post('/login', login);
-// router.post('/newpassword', forgotPassword);
-// router.get('/newpassword/:tokenTemporal', validateTokenTemporal);
-// router.put('/newpassword/:tokenTemporal', newPassword);
-
-// export default router;

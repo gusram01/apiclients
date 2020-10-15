@@ -17,6 +17,7 @@ const userSchema = new Schema<Users>({
   delete: Date,
   nick: {
     type: String,
+    minlength: [3, 'nickname min length: 3 char'],
     maxlength: [38, 'nickName max length: 38 char'],
   },
   firstname: {
@@ -50,6 +51,7 @@ const userSchema = new Schema<Users>({
     select: false,
     required: [true, 'Password is required'],
     minlength: [6, 'Password min length: 6 char'],
+    maxlength: [63, 'Password max length: 63 char'],
   },
   state: {
     type: Boolean,

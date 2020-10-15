@@ -1,7 +1,9 @@
 import bcrypt from 'bcrypt';
-import { ErrorResponse } from '../network/response';
+// import crypto from 'crypto';
 import { Model } from 'mongoose';
 import connect from './database';
+import { ErrorResponse } from '../network/response';
+import { validateInputs, encrypter, getToken } from './utilities';
 
 // Database
 connect()
@@ -9,10 +11,6 @@ connect()
   .catch(console.log);
 
 export const dbMethods = (model: Model<any>) => {
-  const encrypter = async (password: string) => {
-    const saltRounds = await bcrypt.genSalt(10);
-    return await bcrypt.hash(password, saltRounds);
-  };
   return {
     getAll: async () => {
       try {
@@ -37,14 +35,15 @@ export const dbMethods = (model: Model<any>) => {
       }
     },
     newUser: async (data: any) => {
-      const { nick, email, password } = data;
-      const encryptPass = await encrypter(password);
+      if (!validateInputs('newUser', data)) {
+        throw new ErrorResponse(400, 'Please verify the request');
+      }
 
       try {
         const user = await model.create({
-          nick,
-          email,
-          password: encryptPass,
+          nick: data.nick,
+          email: data.email,
+          password: await encrypter(data.password),
         });
         if (!user) {
           throw new ErrorResponse(400, 'Bad Request');
@@ -88,6 +87,40 @@ export const dbMethods = (model: Model<any>) => {
         return user.toObject();
       } catch (error) {
         throw new ErrorResponse(400, error.message);
+      }
+    },
+    login: async (data: any) => {
+      if (!validateInputs('login', data)) {
+        throw new ErrorResponse(400, 'Incorrect login/password');
+      }
+      try {
+        const doc = await model
+          .findOne({ email: data.email })
+          .select('password');
+        if (!doc) {
+          throw new ErrorResponse(400, 'Incorrect login/password');
+        }
+        const validacion = await bcrypt.compare(data.password, doc.password);
+        if (!validacion) {
+          throw new ErrorResponse(400, 'Incorrect login/password');
+        }
+        return { token: getToken(doc._id), id: doc._id };
+      } catch (error) {
+        throw new ErrorResponse(400, error.message);
+      }
+    },
+    findId: async (id: string) => {
+      try {
+        const user = await model.findOne(
+          { _id: id, state: true },
+          '_id category nick email'
+        );
+        if (!user) {
+          throw new ErrorResponse(401, 'Acces denied');
+        }
+        return user;
+      } catch (error) {
+        throw new ErrorResponse(401, error.message);
       }
     },
   };

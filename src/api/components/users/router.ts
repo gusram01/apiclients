@@ -1,6 +1,7 @@
 import Controller from './index';
 import { RequestHandler, Router } from 'express';
 import { successResponse } from '../../../network/response';
+import { secure, validateRol } from './secure';
 
 const router = Router();
 
@@ -36,10 +37,10 @@ const remove: RequestHandler = (req, res, next) => {
     .catch(next);
 };
 
-router.get('/', list);
-router.get('/:id', one);
+router.get('/', secure, validateRol, list);
+router.get('/:id', secure, validateRol, one);
 router.post('/', newOne);
-router.put('/:id', update);
-router.delete('/:id', remove);
+router.put('/:id', secure, validateRol, update);
+router.delete('/:id', secure, validateRol, remove);
 
 export default router;

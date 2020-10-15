@@ -8,4 +8,6 @@ export interface IStore {
   //@ts-expect-error
   updateUser: (id: string, user: Partial<T>) => Promise<Model<T>>;
   delUser: (id: string) => Promise<Model<any>>;
+  login: (id: string) => Promise<any>;
+  findId: (id: string) => Promise<Model<any>>;
 }
