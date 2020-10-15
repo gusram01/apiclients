@@ -1,4 +1,4 @@
-import { RequestHandler, Router, CookieOptions } from 'express';
+import { RequestHandler, Router } from 'express';
 import { successResponse } from '../../../network/response';
 import Controller from './index';
 

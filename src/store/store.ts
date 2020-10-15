@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 // import crypto from 'crypto';
 import { Model } from 'mongoose';
 import connect from './database';
-import { ErrorResponse } from '../network/response';
+import { ErrorResponse } from '../utils/ErrorResponse';
 import { validateInputs, encrypter, getToken } from './utilities';
 
 // Database

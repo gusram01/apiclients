@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { checkAuth } from '../../../middleware/auth';
-import { ErrorResponse } from '../../../network/response';
+import { ErrorResponse } from '../../../utils/ErrorResponse';
 import Controller from './index';
 
 const secure: RequestHandler = (req, res, next) => {

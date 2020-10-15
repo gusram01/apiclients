@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import indexRoutes from './index.routes';
-import { errorHandler } from '../network/response';
+import { errorHandler } from '../network/errorResponse';
 // import { ErrorResponse } from '../middleware/errorResponse';
 
 const app = express();

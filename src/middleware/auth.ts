@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Request } from 'express';
-import { ErrorResponse } from '../network/response';
+import { ErrorResponse } from '../utils/ErrorResponse';
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
