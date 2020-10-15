@@ -36,7 +36,7 @@ export const dbMethods = (model: Model<any>) => {
         throw new ErrorResponse(400, error.message);
       }
     },
-    postOne: async (data: any) => {
+    newUser: async (data: any) => {
       const { nick, email, password } = data;
       const encryptPass = await encrypter(password);
 
@@ -54,7 +54,7 @@ export const dbMethods = (model: Model<any>) => {
         throw new ErrorResponse(400, error.message);
       }
     },
-    updateOne: async (id: string, data: any) => {
+    updateUser: async (id: string, data: any) => {
       const { nick, firstname, lastname, phone } = data;
       try {
         const user = await model.findOneAndUpdate(
@@ -75,7 +75,7 @@ export const dbMethods = (model: Model<any>) => {
         throw new ErrorResponse(400, error.message);
       }
     },
-    delOne: async (id: string) => {
+    delUser: async (id: string) => {
       try {
         const user = await model.findById(id);
         if (!user || !user.state) {
