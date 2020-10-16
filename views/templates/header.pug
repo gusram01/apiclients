@@ -1,3 +1,4 @@
+- const condition = endpoint==='/api/users'?'login':'signup'
 header.header
   .ham
   nav.nav
@@ -7,4 +8,4 @@ header.header
       il.nav__item
         a(href="/help" class="link nav__link") Documentation
       il.nav__item
-        button(class="button nav__link" id="button-signup") Signup
+        a(href= `/${condition}` class="signup link nav__link" id="signup")= condition.toUpperCase()

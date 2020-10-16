@@ -1,9 +1,8 @@
 import bcrypt from 'bcrypt';
-// import crypto from 'crypto';
 import { Model } from 'mongoose';
 import connect from './database';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { validateInputs, encrypter, getToken } from './utilities';
+import { validateInputs, encrypter, getToken } from '../utils/utilities';
 
 // Database
 connect()
