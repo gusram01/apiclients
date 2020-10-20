@@ -63,18 +63,16 @@ const userSchema = new Schema<Users>({
 
 userSchema.set('toObject', {
   transform: function (doc, ret, options) {
-    if (doc.category === 'CLIENT') {
-      delete ret.category;
-      delete ret.resetPassword;
-      delete ret.resetPaswordExpire;
-      delete ret.password;
-      delete ret.state;
-      delete ret.delete;
-      delete ret.create;
-      delete ret.firstname;
-      delete ret.lastname;
-      return ret;
-    }
+    delete ret.category;
+    delete ret.resetPassword;
+    delete ret.resetPaswordExpire;
+    delete ret.password;
+    delete ret.state;
+    delete ret.delete;
+    delete ret.create;
+    delete ret.firstname;
+    delete ret.lastname;
+    return ret;
   },
 });
 

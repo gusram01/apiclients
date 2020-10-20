@@ -34,15 +34,22 @@ export const dbMethods = (model: Model<any>) => {
       }
     },
     newUser: async (data: any) => {
-      if (!validateInputs('newUser', data)) {
+      const { nickname, email, password } = data;
+      if (
+        !validateInputs('newUser', {
+          nick: nickname,
+          email: email,
+          password: password,
+        })
+      ) {
         throw new ErrorResponse(400, 'Please verify the request');
       }
 
       try {
         const user = await model.create({
-          nick: data.nick,
-          email: data.email,
-          password: await encrypter(data.password),
+          nick: nickname,
+          email: email,
+          password: await encrypter(password),
         });
         if (!user) {
           throw new ErrorResponse(400, 'Bad Request');
@@ -89,7 +96,8 @@ export const dbMethods = (model: Model<any>) => {
       }
     },
     login: async (data: any) => {
-      if (!validateInputs('login', data)) {
+      const { email, password } = data;
+      if (!validateInputs('login', { email, password })) {
         throw new ErrorResponse(400, 'Incorrect login/password');
       }
       try {
@@ -115,7 +123,7 @@ export const dbMethods = (model: Model<any>) => {
           '_id category nick email'
         );
         if (!user) {
-          throw new ErrorResponse(401, 'Acces denied');
+          throw new ErrorResponse(401, 'Access denied');
         }
         return user;
       } catch (error) {

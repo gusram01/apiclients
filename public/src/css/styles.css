@@ -115,6 +115,10 @@ body {
   display: none;
 }
 
+.same {
+  display: none;
+}
+
 .form__item label,
 .form__item input {
   position: absolute;

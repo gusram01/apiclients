@@ -13,7 +13,7 @@ const connect = async () => {
       useFindAndModify: false,
     });
   } catch (err) {
-    throw new Error('Error on mongoose.connect: ' + err);
+    throw new Error('Error on mongoose.connect: ' + err.message);
   }
 };
 
