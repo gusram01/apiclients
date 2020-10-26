@@ -1,134 +1,36 @@
-import bcrypt from 'bcrypt';
-import { Model } from 'mongoose';
-import connect from './database';
-import { ErrorResponse } from '../utils/ErrorResponse';
-import { validateInputs, encrypter, getToken } from '../utils/utilities';
+import { Pool } from 'pg';
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
+const connectionString = process.env.POSTG1 as string;
+let pool: Pool;
+let counter = 0;
 
 // Database
-connect()
-  .then(() => console.log('DB online'))
-  .catch(console.log);
+export const db = (table: any) => {
+  if (!pool) {
+    pool = new Pool({ connectionString });
+    console.log('from here');
+    counter++;
+  }
+  console.log(counter);
 
-export const dbMethods = (model: Model<any>) => {
+  const from = `FROM ${table}`;
+  console.log('DB online');
   return {
-    getAll: async () => {
-      try {
-        const data = await model.find({ state: true });
-        if (!data) {
-          throw new ErrorResponse(400, 'No data');
-        }
-        return data.map((user) => user.toObject());
-      } catch (error) {
-        throw new ErrorResponse(400, error.message);
-      }
-    },
-    getOne: async (id: string) => {
-      try {
-        const user = await model.findById(id);
-        if (!user || !user.state) {
-          throw new ErrorResponse(400, 'Bad Request');
-        }
-        return user.toObject();
-      } catch (error) {
-        throw new ErrorResponse(400, error.message);
-      }
-    },
-    newUser: async (data: any) => {
-      const { nickname, email, password } = data;
-      if (
-        !validateInputs('newUser', {
-          nick: nickname,
-          email: email,
-          password: password,
-        })
-      ) {
-        throw new ErrorResponse(400, 'Please verify the request');
-      }
-
-      try {
-        const user = await model.create({
-          nick: nickname,
-          email: email,
-          password: await encrypter(password),
-        });
-        if (!user) {
-          throw new ErrorResponse(400, 'Bad Request');
-        }
-        return user.toObject();
-      } catch (error) {
-        throw new ErrorResponse(400, error.message);
-      }
-    },
-    updateUser: async (id: string, data: any) => {
-      const { nick, firstname, lastname, phone } = data;
-      try {
-        const user = await model.findOneAndUpdate(
-          { _id: id, state: true },
-          {
-            nick,
-            firstname,
-            lastname,
-            phone,
-          },
-          { new: true }
-        );
-        if (!user) {
-          throw new ErrorResponse(400, 'Bad Request');
-        }
-        return user.toObject();
-      } catch (error) {
-        throw new ErrorResponse(400, error.message);
-      }
-    },
-    delUser: async (id: string) => {
-      try {
-        const user = await model.findById(id);
-        if (!user || !user.state) {
-          throw new ErrorResponse(400, 'User not found');
-        }
-        await user.set('nick', user.email).save();
-        await user.set('state', false).save();
-        await user.set('email', `${user._id}@erased.com`).save();
-        await user.set('delete', new Date()).save();
-        return user.toObject();
-      } catch (error) {
-        throw new ErrorResponse(400, error.message);
-      }
-    },
-    login: async (data: any) => {
-      const { email, password } = data;
-      if (!validateInputs('login', { email, password })) {
-        throw new ErrorResponse(400, 'Incorrect login/password');
-      }
-      try {
-        const doc = await model
-          .findOne({ email: data.email })
-          .select('password');
-        if (!doc) {
-          throw new ErrorResponse(400, 'Incorrect login/password');
-        }
-        const validacion = await bcrypt.compare(data.password, doc.password);
-        if (!validacion) {
-          throw new ErrorResponse(400, 'Incorrect login/password');
-        }
-        return { token: getToken(doc._id), id: doc._id };
-      } catch (error) {
-        throw new ErrorResponse(400, error.message);
-      }
-    },
-    findId: async (id: string) => {
-      try {
-        const user = await model.findOne(
-          { _id: id, state: true },
-          '_id category nick email'
-        );
-        if (!user) {
-          throw new ErrorResponse(401, 'Access denied');
-        }
-        return user;
-      } catch (error) {
-        throw new ErrorResponse(401, error.message);
-      }
-    },
+    query: async (query: { select: string; where: string }, values: any) =>
+      await pool.query(
+        `SELECT ${query.select} ${from} WHERE ${query.where}`,
+        values
+      ),
+    getAll: () => {},
+    getOne: (id: string) => {},
+    newUser: (user: any) => {},
+    updateUser: (id: string, user: any) => {},
+    delUser: (id: string) => {},
+    findId: (id: string) => {},
+    login: (id: string) => {},
   };
 };

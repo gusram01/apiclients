@@ -7,7 +7,7 @@ const secure: RequestHandler = (req, res, next) => {
   const decoded = checkAuth(req);
   //@ts-expect-error
   Controller.findId(decoded.id)
-    .then((doc) => {
+    .then((doc: any) => {
       if (!doc) {
         throw new ErrorResponse(401, 'Acces denied');
       }

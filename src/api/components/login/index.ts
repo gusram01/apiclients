@@ -1,7 +1,6 @@
-import { dbMethods } from '../../../store/store';
-import User from '../../../store/models/users';
+import { db } from '../../../store/store';
 import Controller from './controller';
 
-const userStore = dbMethods(User);
+const userStore = db('users');
 
 export default Controller(userStore);
