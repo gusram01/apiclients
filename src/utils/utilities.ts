@@ -1,10 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
-
 interface minMax {
   min: number;
   max: number;

@@ -1,4 +1,6 @@
 node_modules/
+production.env
+development.env
 .env
 dist/
 src/server/file.sql

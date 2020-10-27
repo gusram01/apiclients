@@ -1,10 +1,6 @@
 import PGP, { QueryFile } from 'pg-promise';
 import { ErrorResponse } from '../utils/ErrorResponse';
 
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
-
 const connectionString = process.env.POSTG1 as string;
 const pgp = PGP({
   connect(client, dc, useCount) {

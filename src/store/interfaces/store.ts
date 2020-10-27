@@ -1,9 +1,9 @@
 export interface IStore {
-  getAll: () => any;
-  getOne: (id: string) => any;
-  newUser: (user: any) => any;
-  updateUser: (id: string, user: any) => any;
-  delUser: (id: string) => any;
-  login: (id: string) => any;
-  findId: (id: string) => any;
+  getAll: (table: string) => Promise<any[]>;
+  getOne: (table: string, id: string) => any;
+  newUser: (table: string, user: any) => Promise<any>;
+  updateUser: (table: string, id: string, user: any) => any;
+  delUser: (table: string, id: string) => any;
+  login: (table: string, id: string) => any;
+  findId: (table: string, id: string) => any;
 }

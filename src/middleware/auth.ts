@@ -2,10 +2,6 @@ import jwt from 'jsonwebtoken';
 import { Request } from 'express';
 import { ErrorResponse } from '../utils/ErrorResponse';
 
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
-
 const checkAuth = (req: Request) => {
   let token;
   if (!req.headers.authorization) {
