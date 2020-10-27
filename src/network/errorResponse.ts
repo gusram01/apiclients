@@ -13,21 +13,17 @@ const errorHandler = (
   let error = { ...err };
   error.message = err.message;
 
-  if (err.name === 'CastError') {
-    error = new ErrorResponse(404, `Item not found`);
+  if (err.message.split(' ').includes('duplicate')) {
+    error = new ErrorResponse(
+      404,
+      `${err.message.replace(
+        'duplicate key value violates unique constraint',
+        'DUPLICATE FIELD(S)'
+      )}`
+    );
   }
 
-  if (err.name === 'ValidationError') {
-    const messages = Object
-      //@ts-expect-error
-      .values(err.errors)
-      //@ts-expect-error
-      .map((val) => val.message)
-      .join(' ');
-    error = new ErrorResponse(400, messages);
-  }
-
-  return errorResponse(err, res);
+  return errorResponse(error, res);
 };
 
 export { errorHandler };

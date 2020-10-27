@@ -1,5 +1,3 @@
-import { Error } from 'mongoose';
-
 export class ErrorResponse extends Error {
   statusCode: number;
 

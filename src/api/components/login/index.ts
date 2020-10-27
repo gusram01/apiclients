@@ -1,6 +1,6 @@
-import { db } from '../../../store/store';
+import { store } from '../../../store/store';
 import Controller from './controller';
 
-const userStore = db('users');
+const userStore = store('users');
 
 export default Controller(userStore);

@@ -1,7 +1,6 @@
 import { IStore } from '../../../store/interfaces/store';
 
 const Controller = (store: IStore) => {
-  const query = (query: any, values: any) => store.query(query, values);
   const getAll = () => store.getAll();
   const getOne = (id: string) => store.getOne(id);
   const newUser = (user: any) => store.newUser(user);
@@ -10,7 +9,6 @@ const Controller = (store: IStore) => {
   const findId = (id: string) => store.findId(id);
 
   return {
-    query,
     getAll,
     getOne,
     newUser,

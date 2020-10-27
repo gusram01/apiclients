@@ -1,33 +1,36 @@
-import { Pool } from 'pg';
+import db from './database';
+import { ErrorResponse } from '../utils/ErrorResponse';
+import { encrypter, validateInputs } from '../utils/utilities';
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-const connectionString = process.env.POSTG1 as string;
-let pool: Pool;
-let counter = 0;
-
-// Database
-export const db = (table: any) => {
-  if (!pool) {
-    pool = new Pool({ connectionString });
-    console.log('from here');
-    counter++;
-  }
-  console.log(counter);
-
-  const from = `FROM ${table}`;
-  console.log('DB online');
+export const store = (table: any) => {
   return {
-    query: async (query: { select: string; where: string }, values: any) =>
-      await pool.query(
-        `SELECT ${query.select} ${from} WHERE ${query.where}`,
-        values
-      ),
-    getAll: () => {},
+    getAll: async () => {
+      try {
+        return await db.manyOrNone(`SELECT * from ${table}`);
+      } catch (error) {
+        throw new ErrorResponse(400, error.message);
+      }
+    },
     getOne: (id: string) => {},
-    newUser: (user: any) => {},
+    newUser: async (user: any) => {
+      if (!validateInputs('newUser', user)) {
+        throw new ErrorResponse(400, 'Please Verify your Request');
+      }
+      const { nick, email, password } = user;
+      try {
+        const securedPass = await encrypter(password);
+        return await db.oneOrNone(
+          `INSERT INTO ${table} (nick, email, user_password, user_type_id) VALUES ($1, $2, $3, $4) RETURNING _id`,
+          [nick, email, securedPass, 1]
+        );
+      } catch (error) {
+        throw new ErrorResponse(400, error.message);
+      }
+    },
     updateUser: (id: string, user: any) => {},
     delUser: (id: string) => {},
     findId: (id: string) => {},

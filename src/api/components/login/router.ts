@@ -9,7 +9,7 @@ const login: RequestHandler = (req, res, next) => {
     .then((data: any) => successResponse(req, res, data, 200, true))
     .catch(next);
 };
-// router.post('/', login);
+router.post('/', login);
 // // router.post('/newpassword', forgotPassword);
 // // router.get('/newpassword/:tokenTemporal', validateTokenTemporal);
 // // router.put('/newpassword/:tokenTemporal', newPassword);
