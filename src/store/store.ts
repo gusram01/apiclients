@@ -1,7 +1,9 @@
 import db from './database';
+import bcrypt from 'bcrypt';
 import { ErrorResponse } from '../utils/ErrorResponse';
 import { IStore } from './interfaces/store';
 import { newArgs, upArgs } from './getStrings';
+import { getToken } from '../utils/utilities';
 
 export const store: IStore = {
   getAll: async (table: string) => {
@@ -57,5 +59,21 @@ export const store: IStore = {
       throw new ErrorResponse(400, error.message);
     }
   },
-  login: (table: string, id: string) => {},
+  login: async (data: any) => {
+    const str = `SELECT _id,password,nick,user_type_id FROM users WHERE email=$1 AND active = true`;
+
+    try {
+      const doc = await db.oneOrNone(str, data.email);
+      if (!doc) {
+        throw new ErrorResponse(400, 'Incorrect email/password');
+      }
+      const validacion = await bcrypt.compare(data.password, doc.password);
+      if (!validacion) {
+        throw new ErrorResponse(400, 'Incorrect email/password');
+      }
+      return { token: getToken(doc._id), id: doc._id };
+    } catch (error) {
+      throw new ErrorResponse(400, error.message);
+    }
+  },
 };
