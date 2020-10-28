@@ -2,7 +2,9 @@ import { encrypter } from '../utils/utilities';
 
 const allArgs = (table: string) => {
   const usersStr =
-    table === 'users' || 'customers' || 'cars' ? 'WHERE active=true' : '';
+    table === 'users' || table === 'customers' || table === 'cars'
+      ? 'WHERE active=true'
+      : '';
   const str = `SELECT * FROM ${table} ${usersStr}`;
   return str;
 };
