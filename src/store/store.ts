@@ -1,34 +1,61 @@
 import db from './database';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { encrypter, validateInputs } from '../utils/utilities';
 import { IStore } from './interfaces/store';
+import { newArgs, upArgs } from './getStrings';
 
 export const store: IStore = {
   getAll: async (table: string) => {
+    const str =
+      table === 'users' || 'customers' || 'cars' ? 'WHERE active=true' : '';
     try {
-      return await db.manyOrNone(`SELECT * from ${table}`);
+      const data = await db.manyOrNone(`SELECT * FROM ${table} ${str}`);
+      return data;
     } catch (error) {
       throw new ErrorResponse(400, error.message);
     }
   },
-  getOne: (table: string, id: string) => {},
-  newUser: async (table: string, user: any) => {
-    if (!validateInputs('newUser', user)) {
-      throw new ErrorResponse(400, 'Please Verify your Request');
-    }
-    const { nick, email, password } = user;
+  getOne: async (table: string, id: string) => {
+    const str =
+      table === 'users' || 'customers' || 'cars' ? 'AND active=true' : '';
     try {
-      const securedPass = await encrypter(password);
-      return await db.oneOrNone(
-        `INSERT INTO ${table} (nick, email, user_password, user_type_id) VALUES ($1, $2, $3, $4) RETURNING _id`,
-        [nick, email, securedPass, 1]
+      const data = await db.oneOrNone(
+        `SELECT * FROM ${table} WHERE _id=$1 ${str}`,
+        id
       );
+      return data;
     } catch (error) {
       throw new ErrorResponse(400, error.message);
     }
   },
-  updateUser: (table: string, id: string, user: any) => {},
-  delUser: (table: string, id: string) => {},
-  findId: (table: string, id: string) => {},
+  newOne: async (table: string, data: any) => {
+    try {
+      const resp = await newArgs(table, data);
+      return await db.oneOrNone(resp.str, resp.arr);
+    } catch (error) {
+      throw new ErrorResponse(400, error.message);
+    }
+  },
+  updateOne: async (table: string, id: string, data: any) => {
+    const aux = upArgs(table, id, data);
+    try {
+      const doc = await db.oneOrNone(aux.str, aux.arr);
+      return doc;
+    } catch (error) {
+      throw new ErrorResponse(400, error.message);
+    }
+  },
+  delOne: async (table: string, id: string) => {
+    const str =
+      table === 'users' || 'customers' || 'cars' ? 'AND active=true' : '';
+    try {
+      const data = await db.oneOrNone(
+        `UPDATE ${table} SET active = false, updated_at = NOW() WHERE _id=$1 ${str}`,
+        id
+      );
+      return data;
+    } catch (error) {
+      throw new ErrorResponse(400, error.message);
+    }
+  },
   login: (table: string, id: string) => {},
 };

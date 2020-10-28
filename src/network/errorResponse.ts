@@ -15,10 +15,10 @@ const errorHandler = (
 
   if (err.message.split(' ').includes('duplicate')) {
     error = new ErrorResponse(
-      404,
+      400,
       `${err.message.replace(
         'duplicate key value violates unique constraint',
-        'DUPLICATE FIELD(S)'
+        'MUST BE UNIQUE: '
       )}`
     );
   }

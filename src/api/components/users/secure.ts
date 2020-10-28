@@ -5,17 +5,16 @@ import Controller from './index';
 
 const secure: RequestHandler = (req, res, next) => {
   const decoded = checkAuth(req);
-  //@ts-expect-error
-  Controller.findId(decoded.id)
-    .then((doc: any) => {
-      if (!doc) {
-        throw new ErrorResponse(401, 'Acces denied');
-      }
-      //@ts-expect-error
-      req.user = doc;
-      next();
-    })
-    .catch(next);
+  // Controller.findId(decoded.id)
+  //   .then((doc: any) => {
+  //     if (!doc) {
+  //       throw new ErrorResponse(401, 'Acces denied');
+  //     }
+  //     //@ts-expect-error
+  //     req.user = doc;
+  //     next();
+  //   })
+  //   .catch(next);
 };
 
 const validateRol: RequestHandler = (req, res, next) => {

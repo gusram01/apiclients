@@ -4,19 +4,16 @@ const Controller = (store: IStore) => {
   const table = 'users';
   const getAll = () => store.getAll(table);
   const getOne = (id: string) => store.getOne(table, id);
-  const newUser = (user: any) => store.newUser(table, user);
-  const updateUser = (id: string, user: any) =>
-    store.updateUser(table, id, user);
-  const delUser = (id: string) => store.delUser(table, id);
-  const findId = (id: string) => store.findId(table, id);
+  const newOne = (data: any) => store.newOne(table, data);
+  const updateOne = (id: string, user: any) => store.updateOne(table, id, user);
+  const delOne = (id: string) => store.delOne(table, id);
 
   return {
     getAll,
     getOne,
-    newUser,
-    updateUser,
-    delUser,
-    findId,
+    newOne,
+    updateOne,
+    delOne,
   };
 };
 

@@ -17,19 +17,19 @@ const one: RequestHandler = (req, res, next) => {
 };
 
 const newOne: RequestHandler = (req, res, next) => {
-  Controller.newUser(req.body)
+  Controller.newOne(req.body)
     .then((data: any) => successResponse(req, res, data, 201))
     .catch(next);
 };
 
 const update: RequestHandler = (req, res, next) => {
-  Controller.updateUser(req.params.id, req.body)
+  Controller.updateOne(req.params.id, req.body)
     .then((data: any) => successResponse(req, res, data, 200))
     .catch(next);
 };
 
 const remove: RequestHandler = (req, res, next) => {
-  Controller.delUser(req.params.id)
+  Controller.delOne(req.params.id)
     .then((data: any) =>
       successResponse(req, res, { data, message: 'User erased' }, 200)
     )
