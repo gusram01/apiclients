@@ -1,5 +1,19 @@
 import { encrypter } from '../utils/utilities';
 
+const allArgs = (table: string) => {
+  const usersStr =
+    table === 'users' || 'customers' || 'cars' ? 'WHERE active=true' : '';
+  const str = `SELECT * FROM ${table} ${usersStr}`;
+  return str;
+};
+const oneArgs = (table: string, id: string) => {
+  const usersStr =
+    table === 'users' || 'customers' || 'cars' ? 'AND active=true' : '';
+  const str = `SELECT * FROM ${table} WHERE _id=$1 ${usersStr}`;
+  const arr = [id];
+  return { str, arr };
+};
+
 const newArgs = async (table: string, data: any, role = 1) => {
   const auxData =
     table === 'users'
@@ -18,7 +32,7 @@ const newArgs = async (table: string, data: any, role = 1) => {
       : `(${valColumn})`;
   const argValues = table === 'users' ? [...values, role] : values;
   return {
-    str: `INSERT INTO ${table} ${strColumns} VALUES ${strValColumns} RETURNING _id, nick, email`,
+    str: `INSERT INTO ${table} ${strColumns} VALUES ${strValColumns} RETURNING _id,created_at`,
     arr: argValues,
   };
 };
@@ -49,5 +63,14 @@ const upArgs = (table: string, id: string, data: any) => {
   const str = `UPDATE ${table} SET ${valColumn}, updated_at = NOW() WHERE _id=$1 ${activeCond} RETURNING _id,${columns}`;
   return { str, arr };
 };
+const delArgs = (table: string, id: string) => {
+  const usersStr =
+    table === 'users' || 'customers' || 'cars' ? 'AND active=true' : '';
+  const str = `UPDATE ${table} SET active = false, updated_at = NOW() ${
+    table === 'users' ? ',email_e=email,email=""' : ''
+  } WHERE _id=$1 ${usersStr} RETURNING _id, updated_at as delete_at`;
+  const arr = [id];
+  return { arr, str };
+};
 
-export { newArgs, upArgs };
+export { newArgs, upArgs, oneArgs, allArgs, delArgs };

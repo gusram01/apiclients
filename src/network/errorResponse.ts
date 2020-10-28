@@ -13,12 +13,21 @@ const errorHandler = (
   let error = { ...err };
   error.message = err.message;
 
-  if (err.message.split(' ').includes('duplicate')) {
+  if (err.message.includes('duplicate key value violates')) {
     error = new ErrorResponse(
       400,
       `${err.message.replace(
         'duplicate key value violates unique constraint',
         'MUST BE UNIQUE: '
+      )}`
+    );
+  }
+  if (err.message.includes('invalid input syntax')) {
+    error = new ErrorResponse(
+      400,
+      `${err.message.replace(
+        'invalid input syntax for type uuid',
+        'ID IS NOT CORRECT'
       )}`
     );
   }
