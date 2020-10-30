@@ -1,7 +1,14 @@
 import db from './database';
 import bcrypt from 'bcrypt';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { allArgs, delArgs, newArgs, oneArgs, upArgs } from './getStrings';
+import {
+  allArgs,
+  delArgs,
+  newArgs,
+  someArgs,
+  upArgs,
+  oneIdArgs,
+} from './getStrings';
 import { getToken } from '../utils/utilities';
 import { IStore } from './interfaces/store';
 
@@ -16,13 +23,25 @@ export const store: IStore = {
     }
   },
   getOne: async (table: string, id: string) => {
-    const { str, arr } = oneArgs(table, id);
+    const { str, arr } = oneIdArgs(table, id);
     try {
       const row = await db.oneOrNone(str, arr);
       if (!row) {
         throw new ErrorResponse(404, 'Id not found');
       }
       return row;
+    } catch (error) {
+      throw new ErrorResponse(error.statusCode || 400, error.message);
+    }
+  },
+  getSome: async (table: string, data: any) => {
+    const { str, arr } = someArgs(table, data);
+    try {
+      const rows = await db.manyOrNone(str, arr);
+      if (!rows || rows.length === 0) {
+        throw new ErrorResponse(404, 'Try with another info');
+      }
+      return rows;
     } catch (error) {
       throw new ErrorResponse(error.statusCode || 400, error.message);
     }

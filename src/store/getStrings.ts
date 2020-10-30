@@ -8,11 +8,32 @@ const allArgs = (table: string) => {
   const str = `SELECT * FROM ${table} ${usersStr}`;
   return str;
 };
-const oneArgs = (table: string, id: string) => {
+const oneIdArgs = (table: string, id: string) => {
   const usersStr =
-    table === 'users' || 'customers' || 'cars' ? 'AND active=true' : '';
+    table === 'users' || table === 'customers' || table === 'cars'
+      ? 'WHERE active=true'
+      : '';
   const str = `SELECT * FROM ${table} WHERE _id=$1 ${usersStr}`;
   const arr = [id];
+  return { str, arr };
+};
+
+const someArgs = (table: string, data: any) => {
+  const auxData: any = {};
+  Object.keys(data).map((key) => {
+    if (
+      key.trim() !== 'active' &&
+      key.trim() !== 'password' &&
+      data[key].trim() !== ''
+    ) {
+      return (auxData[key] = data[key]);
+    }
+  });
+  const arr = Object.keys(auxData);
+  const valColumn = arr.map((key) => `${key}='${auxData[key]}'`).join(' AND ');
+  const str = `SELECT * FROM ${table} ${
+    arr.length > 0 ? 'WHERE ' + valColumn : ''
+  }`;
   return { str, arr };
 };
 
@@ -60,14 +81,18 @@ const upArgs = (table: string, id: string, data: any) => {
   const columns = Object.keys(auxData).join(',');
 
   const activeCond =
-    table === 'users' || 'customers' || 'cars' ? 'AND active=true' : '';
+    table === 'users' || table === 'customers' || table === 'cars'
+      ? 'AND active=true'
+      : '';
   const arr = [id];
   const str = `UPDATE ${table} SET ${valColumn}, updated_at = NOW() WHERE _id=$1 ${activeCond} RETURNING _id,${columns}`;
   return { str, arr };
 };
 const delArgs = (table: string, id: string) => {
   const usersStr =
-    table === 'users' || 'customers' || 'cars' ? 'AND active=true' : '';
+    table === 'users' || table === 'customers' || table === 'cars'
+      ? 'AND active=true'
+      : '';
   const str = `UPDATE ${table} SET active = false, updated_at = NOW() ${
     table === 'users' ? ',email_e=email,email=""' : ''
   } WHERE _id=$1 ${usersStr} RETURNING _id, updated_at as delete_at`;
@@ -75,4 +100,4 @@ const delArgs = (table: string, id: string) => {
   return { arr, str };
 };
 
-export { newArgs, upArgs, oneArgs, allArgs, delArgs };
+export { newArgs, upArgs, someArgs, allArgs, delArgs, oneIdArgs };
