@@ -15,5 +15,6 @@ router.use('/api/versions', network);
 router.use('/api/brand_model', network);
 router.use('/api/customers', network);
 router.use('/api/operations', network);
+router.use('/api/user_types_id', network);
 
 export default router;
