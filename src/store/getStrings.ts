@@ -11,7 +11,7 @@ const allArgs = (table: string) => {
 const oneIdArgs = (table: string, id: string) => {
   const usersStr =
     table === 'users' || table === 'customers' || table === 'cars'
-      ? 'WHERE active=true'
+      ? 'AND active=true'
       : '';
   const str = `SELECT * FROM ${table} WHERE _id=$1 ${usersStr}`;
   const arr = [id];
