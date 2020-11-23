@@ -1,9 +1,8 @@
-import path from 'path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import indexRoutes from './index.routes';
+import network from '../api/router';
 import { errorHandler } from '../network/errorResponse';
 
 const app = express();
@@ -15,12 +14,7 @@ app.use(cors());
 app.use(cookieParser());
 
 // Routes
-app.use(express.static(path.join(__dirname, '..', '..', '/public')));
-app.use('/', indexRoutes);
-
-// template engine
-app.set('views', './views');
-app.set('view engine', 'pug');
+app.use('/api', network);
 
 // Error handler
 app.use(errorHandler);

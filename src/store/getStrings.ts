@@ -21,11 +21,7 @@ const oneIdArgs = (table: string, id: string) => {
 const someArgs = (table: string, data: any) => {
   const auxData: any = {};
   Object.keys(data).map((key) => {
-    if (
-      key.trim() !== 'active' &&
-      key.trim() !== 'password' &&
-      data[key].trim() !== ''
-    ) {
+    if (key.trim() !== 'active' && key.trim() !== 'password') {
       return (auxData[key] = data[key]);
     }
   });
@@ -70,7 +66,7 @@ const upArgs = (table: string, id: string, data: any) => {
       key.trim() !== 'password' &&
       key.trim() !== 'email' &&
       key.trim() !== 'birthdate' &&
-      data[key].trim() !== ''
+      key.trim() !== ''
     ) {
       return (auxData[key] = data[key]);
     }
@@ -86,6 +82,7 @@ const upArgs = (table: string, id: string, data: any) => {
       : '';
   const arr = [id];
   const str = `UPDATE ${table} SET ${valColumn}, updated_at = NOW() WHERE _id=$1 ${activeCond} RETURNING _id,${columns}`;
+
   return { str, arr };
 };
 const delArgs = (table: string, id: string) => {
