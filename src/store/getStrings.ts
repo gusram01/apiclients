@@ -19,18 +19,35 @@ const oneIdArgs = (table: string, id: string) => {
 };
 
 const someArgs = (table: string, data: any) => {
+  // { table: 'cars_customers', relation: ['cars', 'customers'] },
+  // { table: 'users_customers', relation: ['users', 'customers'] },
+
   const auxData: any = {};
   Object.keys(data).map((key) => {
     if (key.trim() !== 'active' && key.trim() !== 'password') {
       return (auxData[key] = data[key]);
     }
   });
-  const arr = Object.keys(auxData);
-  const valColumn = arr.map((key) => `${key}='${auxData[key]}'`).join(' AND ');
+  const auxArr = Object.keys(auxData);
+  let arr: any[] = [];
+  const valColumn = auxArr
+    .map((key, index) => {
+      arr.push(auxData[key]);
+      return `${key} = $${index + 1}`;
+    })
+    .join(' AND ');
   const str = `SELECT * FROM ${table} ${
-    arr.length > 0 ? 'WHERE ' + valColumn : ''
+    auxArr.length > 0 ? 'WHERE ' + valColumn : ''
   }`;
-  return { str, arr };
+  const auxStr =
+    'SELECT * FROM cars_categories as a ' +
+    'JOIN cars as b ' +
+    'ON b._id = a.cars_id ' +
+    'JOIN categories as c ' +
+    'ON c._id = a.categories_id ' +
+    `${auxArr.length > 0 ? 'WHERE ' + valColumn : ''}`;
+
+  return { str: table !== 'cars_categories' ? str : auxStr, arr };
 };
 
 const newArgs = async (table: string, data: any, role = 1) => {

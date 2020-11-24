@@ -9,5 +9,15 @@ const pgp = PGP({
   },
 });
 const db = pgp(connectionString);
+const qf = new QueryFile('file.sql', {
+  minify: true,
+});
+if (qf.error) {
+  throw new ErrorResponse(500, qf.error.message);
+}
+
+db.none(qf)
+  .then(() => console.log('DB ready'))
+  .catch(console.log);
 
 export default db;

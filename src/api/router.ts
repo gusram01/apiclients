@@ -39,7 +39,6 @@ const remove: RequestHandler = (req, res, next) => {
 };
 
 const some: RequestHandler = (req, res, next) => {
-  console.log(req.query);
   Controller.getSome(req.params.table, req.query)
     .then((data: any) => successResponse(req, res, data, 200))
     .catch(next);
