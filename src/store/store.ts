@@ -11,10 +11,11 @@ import {
 } from './getStrings';
 import { getToken } from '../utils/utilities';
 import { IStore } from './interfaces/store';
+import { Request } from 'express';
 
 export const store: IStore = {
-  getAll: async (table: string) => {
-    const str = allArgs(table);
+  roles: async () => {
+    const str = 'SELECT * FROM roles';
     try {
       const rows = await db.manyOrNone(str);
       return rows;
@@ -22,8 +23,17 @@ export const store: IStore = {
       throw new ErrorResponse(error.statusCode || 400, error.message);
     }
   },
-  getOne: async (table: string, id: string) => {
-    const { str, arr } = oneIdArgs(table, id);
+  getAll: async (req: Request) => {
+    const str = allArgs(req.params.table);
+    try {
+      const rows = await db.manyOrNone(str);
+      return rows;
+    } catch (error) {
+      throw new ErrorResponse(error.statusCode || 400, error.message);
+    }
+  },
+  getOne: async (req: Request) => {
+    const { str, arr } = oneIdArgs(req.params.table, req.params.id);
     try {
       const row = await db.oneOrNone(str, arr);
       if (!row) {
@@ -34,8 +44,8 @@ export const store: IStore = {
       throw new ErrorResponse(error.statusCode || 400, error.message);
     }
   },
-  getSome: async (table: string, data: any) => {
-    const { str, arr } = someArgs(table, data);
+  getSome: async (req: Request) => {
+    const { str, arr } = someArgs(req.params.table, req.query);
     try {
       const rows = await db.manyOrNone(str, arr);
       if (!rows || rows.length === 0) {
@@ -46,17 +56,24 @@ export const store: IStore = {
       throw new ErrorResponse(error.statusCode || 400, error.message);
     }
   },
-  newOne: async (table: string, data: any) => {
+  newOne: async (req: Request) => {
     try {
-      const { str, arr } = await newArgs(table, data);
+      const { str, arr } = await newArgs(req.params.table, req.body);
       const row = await db.oneOrNone(str, arr);
-      return row;
+      if (req.params.table === 'users') {
+        return {
+          token: getToken(row._id, row.email, row.roles_id.toString()),
+          id: row._id,
+        };
+      } else {
+        return row;
+      }
     } catch (error) {
       throw new ErrorResponse(error.statusCode || 400, error.message);
     }
   },
-  updateOne: async (table: string, id: string, data: any) => {
-    const { str, arr } = upArgs(table, id, data);
+  updateOne: async (req: Request) => {
+    const { str, arr } = upArgs(req.params.table, req.params.id, req.body);
     try {
       const row = await db.oneOrNone(str, arr);
       if (!row) {
@@ -67,8 +84,8 @@ export const store: IStore = {
       throw new ErrorResponse(error.statusCode || 400, error.message);
     }
   },
-  delOne: async (table: string, id: string) => {
-    const { str, arr } = delArgs(table, id);
+  delOne: async (req: Request) => {
+    const { str, arr } = delArgs(req.params.table, req.params.id);
     try {
       const row = await db.oneOrNone(str, arr);
       if (!row) {
@@ -79,20 +96,24 @@ export const store: IStore = {
       throw new ErrorResponse(error.statusCode || 400, error.message);
     }
   },
-  login: async (data: any) => {
+  login: async (req: Request) => {
     const str =
-      'SELECT _id,password,nick,user_type_id FROM users WHERE email=$1 AND active = true';
+      'SELECT _id,email,password,nick,roles_id FROM users WHERE email=$1 AND active = true';
 
     try {
-      const row = await db.oneOrNone(str, data.email);
+      const row = await db.oneOrNone(str, req.body.email);
       if (!row) {
         throw new ErrorResponse(400, 'Incorrect email/password');
       }
-      const correctPass = await bcrypt.compare(data.password, row.password);
+
+      const correctPass = await bcrypt.compare(req.body.password, row.password);
       if (!correctPass) {
         throw new ErrorResponse(400, 'Incorrect email/password');
       }
-      return { token: getToken(row._id), id: row._id };
+      return {
+        token: getToken(row._id, row.email, row.roles_id.toString()),
+        id: row._id,
+      };
     } catch (error) {
       throw new ErrorResponse(error.statusCode || 400, error.message);
     }

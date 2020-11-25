@@ -5,25 +5,25 @@ import { successResponse } from '../network/successResponse';
 const router = Router();
 
 const list: RequestHandler = async (req, res, next) => {
-  Controller.getAll(req.params.table)
+  Controller.getAll(req)
     .then((data: any) => successResponse(req, res, data, 200))
     .catch(next);
 };
 
 const one: RequestHandler = (req, res, next) => {
-  Controller.getOne(req.params.table, req.params.id)
+  Controller.getOne(req)
     .then((data: any) => successResponse(req, res, data, 200))
     .catch(next);
 };
 
 const newOne: RequestHandler = (req, res, next) => {
-  Controller.newOne(req.params.table, req.body)
+  Controller.newOne(req)
     .then((data: any) => successResponse(req, res, data, 201))
     .catch(next);
 };
 
 const update: RequestHandler = (req, res, next) => {
-  Controller.updateOne(req.params.table, req.params.id, req.body)
+  Controller.updateOne(req)
     .then((data: any) => {
       successResponse(req, res, data, 200);
     })
@@ -31,7 +31,7 @@ const update: RequestHandler = (req, res, next) => {
 };
 
 const remove: RequestHandler = (req, res, next) => {
-  Controller.delOne(req.params.table, req.params.id)
+  Controller.delOne(req)
     .then((data: any) =>
       successResponse(req, res, { data, message: 'Registry erased' }, 200)
     )
@@ -39,11 +39,18 @@ const remove: RequestHandler = (req, res, next) => {
 };
 
 const some: RequestHandler = (req, res, next) => {
-  Controller.getSome(req.params.table, req.query)
+  Controller.getSome(req)
     .then((data: any) => successResponse(req, res, data, 200))
     .catch(next);
 };
 
+const login: RequestHandler = (req, res, next) => {
+  Controller.login(req)
+    .then((data: any) => successResponse(req, res, data, 200))
+    .catch(next);
+};
+
+router.post('/login', login);
 router.get('/:table/find', some);
 router.get('/:table', list);
 router.get('/:table/:id', one);

@@ -31,8 +31,8 @@ const encrypter = async (password: string) => {
   return await bcrypt.hash(password, saltRounds);
 };
 
-const getToken = (idUser: string) => {
-  return jwt.sign({ id: idUser }, process.env.KEYSECRET_JWT!, {
+const getToken = (id: string, email: string, roles: string) => {
+  return jwt.sign({ id, email, roles }, process.env.KEYSECRET_JWT!, {
     expiresIn: process.env.EXPIRE_JWT,
   });
 };

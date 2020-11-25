@@ -1,9 +1,12 @@
+import { Request } from 'express';
+
 export interface IStore {
-  getAll: (table: string) => Promise<any[]>;
-  getOne: (table: string, id: string) => Promise<any>;
-  getSome: (table: string, data: any) => Promise<any[]>;
-  newOne: (table: string, data: any) => Promise<any>;
-  updateOne: (table: string, id: string, data: any) => Promise<any>;
-  delOne: (table: string, id: string) => Promise<any>;
-  login: (data: any) => Promise<any>;
+  getAll: (request: Request) => Promise<any[]>;
+  getOne: (request: Request) => Promise<any>;
+  getSome: (request: Request) => Promise<any[]>;
+  newOne: (request: Request) => Promise<any>;
+  updateOne: (request: Request) => Promise<any>;
+  delOne: (request: Request) => Promise<any>;
+  login: (request: Request) => Promise<any>;
+  roles: () => Promise<any>;
 }

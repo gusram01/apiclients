@@ -1,18 +1,45 @@
 import { encrypter } from '../utils/utilities';
 
+interface DataRequest {
+  [key: string]: string | number | boolean;
+}
+
+const tablesActive = ['users', 'customers', 'cars'];
+const functionType = [
+  { id: 'getAll', some: 'WHERE' },
+  { id: 'getOne', some: 'AND' },
+  { id: 'getSome', some: '' },
+  { id: 'newOne', some: '' },
+  { id: 'updateOne', some: 'AND' },
+  { id: 'delOne', some: 'AND' },
+  { id: 'login', some: 'WHERE' },
+];
+
+const limitForTable = (table: string) => {
+  let finalStr = '';
+  if (tablesActive.includes(table)) {
+    finalStr = ' active = true';
+  }
+  return (type: string) => {
+    const aux = functionType.find((item) => item.id === type)?.some;
+    return `${aux && finalStr !== '' ? aux + finalStr : ''} `;
+  };
+};
+
+// const mapObject = (data: DataRequest )=>{
+
+// }
+
 const allArgs = (table: string) => {
-  const usersStr =
-    table === 'users' || table === 'customers' || table === 'cars'
-      ? 'WHERE active=true'
-      : '';
+  const what = limitForTable(table);
+  const usersStr = what('getAll');
   const str = `SELECT * FROM ${table} ${usersStr}`;
   return str;
 };
+
 const oneIdArgs = (table: string, id: string) => {
-  const usersStr =
-    table === 'users' || table === 'customers' || table === 'cars'
-      ? 'AND active=true'
-      : '';
+  const what = limitForTable(table);
+  const usersStr = what('getOne');
   const str = `SELECT * FROM ${table} WHERE _id=$1 ${usersStr}`;
   const arr = [id];
   return { str, arr };
@@ -39,15 +66,15 @@ const someArgs = (table: string, data: any) => {
   const str = `SELECT * FROM ${table} ${
     auxArr.length > 0 ? 'WHERE ' + valColumn : ''
   }`;
-  const auxStr =
-    'SELECT * FROM cars_categories as a ' +
-    'JOIN cars as b ' +
-    'ON b._id = a.cars_id ' +
-    'JOIN categories as c ' +
-    'ON c._id = a.categories_id ' +
-    `${auxArr.length > 0 ? 'WHERE ' + valColumn : ''}`;
+  // const auxStr =
+  //   'SELECT * FROM cars_categories as a ' +
+  //   'JOIN cars as b ' +
+  //   'ON b._id = a.cars_id ' +
+  //   'JOIN categories as c ' +
+  //   'ON c._id = a.categories_id ' +
+  //   `${auxArr.length > 0 ? 'WHERE ' + valColumn : ''}`;
 
-  return { str: table !== 'cars_categories' ? str : auxStr, arr };
+  return { str, arr };
 };
 
 const newArgs = async (table: string, data: any, role = 1) => {
@@ -61,14 +88,14 @@ const newArgs = async (table: string, data: any, role = 1) => {
     .map((_, i) => `$${i + 1}`)
     .join(',');
   const strColumns =
-    table === 'users' ? `(${columns}, user_type_id)` : `(${columns})`;
+    table === 'users' ? `(${columns}, roles_id)` : `(${columns})`;
   const strValColumns =
     table === 'users'
       ? `(${valColumn},$${values.length + 1})`
       : `(${valColumn})`;
   const argValues = table === 'users' ? [...values, role] : values;
   return {
-    str: `INSERT INTO ${table} ${strColumns} VALUES ${strValColumns} RETURNING _id,created_at`,
+    str: `INSERT INTO ${table} ${strColumns} VALUES ${strValColumns} RETURNING *`,
     arr: argValues,
   };
 };
@@ -92,21 +119,24 @@ const upArgs = (table: string, id: string, data: any) => {
     .map((key) => `${key}='${auxData[key]}'`)
     .join(',');
   const columns = Object.keys(auxData).join(',');
+  const what = limitForTable(table);
 
-  const activeCond =
-    table === 'users' || table === 'customers' || table === 'cars'
-      ? 'AND active=true'
-      : '';
+  const activeCond = what('updateOne');
+  // table === 'users' || table === 'customers' || table === 'cars'
+  //   ? 'AND active=true'
+  //   : '';
   const arr = [id];
   const str = `UPDATE ${table} SET ${valColumn}, updated_at = NOW() WHERE _id=$1 ${activeCond} RETURNING _id,${columns}`;
 
   return { str, arr };
 };
 const delArgs = (table: string, id: string) => {
-  const usersStr =
-    table === 'users' || table === 'customers' || table === 'cars'
-      ? 'AND active=true'
-      : '';
+  const what = limitForTable(table);
+
+  const usersStr = what('delOne');
+  // table === 'users' || table === 'customers' || table === 'cars'
+  //   ? 'AND active=true'
+  //   : '';
   const str = `UPDATE ${table} SET active = false, updated_at = NOW() ${
     table === 'users' ? ',email_e=email,email=""' : ''
   } WHERE _id=$1 ${usersStr} RETURNING _id, updated_at as delete_at`;
