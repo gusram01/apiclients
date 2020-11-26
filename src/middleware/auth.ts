@@ -1,10 +1,18 @@
 import jwt from 'jsonwebtoken';
-import { RequestHandler } from 'express';
+import { RequestHandler, Request } from 'express';
 import { ErrorResponse } from '../utils/ErrorResponse';
 import { appRoles } from './roles';
 import { store } from '../store/store';
 
 const authentication: RequestHandler = (req, res, next) => {
+  // Omit login
+  if (req.url === '/login') {
+    return next();
+  }
+  // Omit signup
+  if (req.params.table === 'users' && req.method === 'POST') {
+    return next();
+  }
   if (!req.headers.authorization) {
     throw new ErrorResponse(401, 'Access denied');
   }
@@ -23,6 +31,14 @@ const authentication: RequestHandler = (req, res, next) => {
 };
 
 const authorization: RequestHandler = (req, res, next) => {
+  // Omit login
+  if (req.url === '/login') {
+    return next();
+  }
+  // Omit signup
+  if (req.params.table === 'users' && req.method === 'POST') {
+    return next();
+  }
   store
     .roles()
     .then((data: { _id: number; description: string }[]) => {

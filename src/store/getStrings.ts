@@ -1,8 +1,51 @@
+import { Request } from 'express';
 import { encrypter } from '../utils/utilities';
 
 interface DataRequest {
   [key: string]: string | number | boolean;
 }
+
+// SELECT columns
+// FROM table
+// WHERE column = value, othercolumn = othervalue
+// RETURNING columnstoreturn
+
+// INSERT INTO table (column1,column2 )
+// VALUES (value1, value2)
+// RETURNING columnstoreturn
+
+// UPDATE table
+// SET column=value, updated_at = NOW()
+// WHERE _id=$1 AND active = true
+// RETURNING _id, columns
+
+// SELECT columns
+// FROM tableA as a
+// JOIN tableB as b
+// ON a.key = b.key
+// WHERE column = value, othercolumn = othervalue
+// RETURNING columnstoreturn
+
+function setIntro(req: Request) {
+  const table = req.params.table;
+  console.log(table);
+  const method = req.method;
+  if (req.url === '/login') {
+    return 'SELECT ';
+  }
+  if (method === 'POST') {
+    return 'INSERT ';
+  }
+  if (method === 'PUT') {
+    return 'UPDATE ';
+  }
+  return 'SELECT ';
+}
+
+const getString = (req: Request) => {
+  const intro = setIntro(req);
+  console.log(intro);
+};
 
 const tablesActive = ['users', 'customers', 'cars'];
 const functionType = [
@@ -144,4 +187,4 @@ const delArgs = (table: string, id: string) => {
   return { arr, str };
 };
 
-export { newArgs, upArgs, someArgs, allArgs, delArgs, oneIdArgs };
+export { getString, newArgs, upArgs, someArgs, allArgs, delArgs, oneIdArgs };

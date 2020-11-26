@@ -8,6 +8,7 @@ import {
   someArgs,
   upArgs,
   oneIdArgs,
+  getString,
 } from './getStrings';
 import { getToken } from '../utils/utilities';
 import { IStore } from './interfaces/store';
@@ -24,6 +25,7 @@ export const store: IStore = {
     }
   },
   getAll: async (req: Request) => {
+    getString(req);
     const str = allArgs(req.params.table);
     try {
       const rows = await db.manyOrNone(str);
@@ -33,6 +35,7 @@ export const store: IStore = {
     }
   },
   getOne: async (req: Request) => {
+    getString(req);
     const { str, arr } = oneIdArgs(req.params.table, req.params.id);
     try {
       const row = await db.oneOrNone(str, arr);
@@ -45,6 +48,7 @@ export const store: IStore = {
     }
   },
   getSome: async (req: Request) => {
+    getString(req);
     const { str, arr } = someArgs(req.params.table, req.query);
     try {
       const rows = await db.manyOrNone(str, arr);
@@ -57,6 +61,7 @@ export const store: IStore = {
     }
   },
   newOne: async (req: Request) => {
+    getString(req);
     try {
       const { str, arr } = await newArgs(req.params.table, req.body);
       const row = await db.oneOrNone(str, arr);
@@ -73,6 +78,7 @@ export const store: IStore = {
     }
   },
   updateOne: async (req: Request) => {
+    getString(req);
     const { str, arr } = upArgs(req.params.table, req.params.id, req.body);
     try {
       const row = await db.oneOrNone(str, arr);
@@ -85,6 +91,7 @@ export const store: IStore = {
     }
   },
   delOne: async (req: Request) => {
+    getString(req);
     const { str, arr } = delArgs(req.params.table, req.params.id);
     try {
       const row = await db.oneOrNone(str, arr);
@@ -97,9 +104,9 @@ export const store: IStore = {
     }
   },
   login: async (req: Request) => {
+    getString(req);
     const str =
       'SELECT _id,email,password,nick,roles_id FROM users WHERE email=$1 AND active = true';
-
     try {
       const row = await db.oneOrNone(str, req.body.email);
       if (!row) {
