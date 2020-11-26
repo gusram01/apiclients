@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsnd -r dotenv/config src/server/server",
+    "prebuild": "copyfiles -u 1 src/swagger.json dist",
     "build": "tsc",
     "start": "set NODE_ENV=production && node dist/server/server"
   },
@@ -26,6 +27,7 @@
   "dependencies": {
     "bcrypt": "^5.0.0",
     "cookie-parser": "^1.4.5",
+    "copyfiles": "^2.4.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "helmet": "^3.22.1",
