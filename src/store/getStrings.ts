@@ -14,6 +14,12 @@ interface DataRequest {
 // VALUES (value1, value2)
 // RETURNING columnstoreturn
 
+/**
+ * INSERT INTO (brands) name
+ * VALUES $1
+ * RETURNING _id
+ */
+
 // UPDATE table
 // SET column=value, updated_at = NOW()
 // WHERE _id=$1 AND active = true
