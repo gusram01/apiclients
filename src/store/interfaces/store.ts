@@ -7,6 +7,5 @@ export interface IStore {
   newOne: (request: Request) => Promise<any>;
   updateOne: (request: Request) => Promise<any>;
   delOne: (request: Request) => Promise<any>;
-  login: (request: Request) => Promise<any>;
   roles: () => Promise<any>;
 }

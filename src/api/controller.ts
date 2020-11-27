@@ -8,7 +8,6 @@ const Controller = (store: IStore) => {
   const updateOne = (req: Request) => store.updateOne(req);
   const delOne = (req: Request) => store.delOne(req);
   const getSome = (req: Request) => store.getSome(req);
-  const login = (req: Request) => store.login(req);
 
   return {
     getAll,
@@ -17,7 +16,6 @@ const Controller = (store: IStore) => {
     updateOne,
     delOne,
     getSome,
-    login,
   };
 };
 

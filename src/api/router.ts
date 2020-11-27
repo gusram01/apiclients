@@ -44,13 +44,6 @@ const some: RequestHandler = (req, res, next) => {
     .catch(next);
 };
 
-const login: RequestHandler = (req, res, next) => {
-  Controller.login(req)
-    .then((data: any) => successResponse(req, res, data, 200))
-    .catch(next);
-};
-
-router.post('/login', login);
 router.get('/:table/find', some);
 router.get('/:table', list);
 router.get('/:table/:id', one);

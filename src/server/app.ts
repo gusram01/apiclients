@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import swaggerUI from 'swagger-ui-express';
-import network from '../api/router';
+import router from '../api/router';
 import { errorHandler } from '../network/errorResponse';
 import { authentication, authorization } from '../middleware/auth';
 
@@ -17,7 +17,7 @@ app.use(cors());
 app.use(cookieParser());
 
 // Routes
-app.use('/api', authentication, authorization, network);
+app.use('/api', authentication, authorization, router);
 app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerDoc));
 
 // Error handler

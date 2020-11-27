@@ -1,152 +1,102 @@
 import { Request } from 'express';
-import { encrypter } from '../utils/utilities';
+import { ErrorResponse } from '../utils/ErrorResponse';
 
 interface DataRequest {
   [key: string]: string | number | boolean;
 }
 
-// SELECT columns
-// FROM table
-// WHERE column = value, othercolumn = othervalue
-// RETURNING columnstoreturn
-
-// INSERT INTO table (column1,column2 )
-// VALUES (value1, value2)
-// RETURNING columnstoreturn
-
-/**
- * INSERT INTO (brands) name
- * VALUES $1
- * RETURNING _id
- */
-
-// UPDATE table
-// SET column=value, updated_at = NOW()
-// WHERE _id=$1 AND active = true
-// RETURNING _id, columns
-
-// SELECT columns
-// FROM tableA as a
-// JOIN tableB as b
-// ON a.key = b.key
-// WHERE column = value, othercolumn = othervalue
-// RETURNING columnstoreturn
-
-function setIntro(req: Request) {
-  const table = req.params.table;
-  console.log(table);
-  const method = req.method;
-  if (req.url === '/login') {
-    return 'SELECT ';
-  }
-  if (method === 'POST') {
-    return 'INSERT ';
-  }
-  if (method === 'PUT') {
-    return 'UPDATE ';
-  }
-  return 'SELECT ';
-}
-
 const getString = (req: Request) => {
-  const intro = setIntro(req);
-  console.log(intro);
-};
-
-const tablesActive = ['users', 'customers', 'cars'];
-const functionType = [
-  { id: 'getAll', some: 'WHERE' },
-  { id: 'getOne', some: 'AND' },
-  { id: 'getSome', some: '' },
-  { id: 'newOne', some: '' },
-  { id: 'updateOne', some: 'AND' },
-  { id: 'delOne', some: 'AND' },
-  { id: 'login', some: 'WHERE' },
-];
-
-const limitForTable = (table: string) => {
-  let finalStr = '';
-  if (tablesActive.includes(table)) {
-    finalStr = ' active = true';
+  let str = '';
+  const conditions: string[] = [];
+  switch (req.method) {
+    case 'GET':
+      if (req.params.id) {
+      }
+      break;
+    case 'POST':
+      break;
+    case 'PUT':
+      break;
+    case 'DELETE':
+      break;
+    default:
+      throw new ErrorResponse(400, 'Try another HTTP method');
   }
-  return (type: string) => {
-    const aux = functionType.find((item) => item.id === type)?.some;
-    return `${aux && finalStr !== '' ? aux + finalStr : ''} `;
-  };
+  return { str, conditions };
 };
 
-// const mapObject = (data: DataRequest )=>{
-
-// }
-
-const allArgs = (table: string) => {
-  const what = limitForTable(table);
-  const usersStr = what('getAll');
-  const str = `SELECT * FROM ${table} ${usersStr}`;
-  return str;
+const finalConditions = (req: Request) => {
+  const flag = ['users', 'cars', 'customers'].includes(req.params.table);
+  return flag ? ' WHERE active = true' : '';
 };
 
-const oneIdArgs = (table: string, id: string) => {
-  const what = limitForTable(table);
-  const usersStr = what('getOne');
-  const str = `SELECT * FROM ${table} WHERE _id=$1 ${usersStr}`;
-  const arr = [id];
-  return { str, arr };
+const allArgs = (req: Request) => {
+  //@ts-expect-error
+  const { fields } = req.tabledescription;
+  return `SELECT ${fields
+    .filter((item: string) => item !== 'password')
+    .join(', ')} FROM ${req.params.table} ${finalConditions(req)}`;
+};
+const oneArgs = (req: Request) => {
+  //@ts-expect-error
+  const { fields } = req.tabledescription;
+  return `SELECT ${fields
+    .filter((item: string) => item !== 'password')
+    .join(', ')} FROM ${req.params.table} ${finalConditions(req)} AND _id=$1`;
 };
 
-const someArgs = (table: string, data: any) => {
-  // { table: 'cars_customers', relation: ['cars', 'customers'] },
-  // { table: 'users_customers', relation: ['users', 'customers'] },
-
-  const auxData: any = {};
-  Object.keys(data).map((key) => {
-    if (key.trim() !== 'active' && key.trim() !== 'password') {
-      return (auxData[key] = data[key]);
-    }
-  });
-  const auxArr = Object.keys(auxData);
+const someArgs = (req: Request) => {
+  //@ts-expect-error
+  const { fields } = req.tabledescription;
   let arr: any[] = [];
-  const valColumn = auxArr
+  const data = { ...req.query };
+  delete data.active;
+  delete data.password;
+
+  const conditions = Object.keys(data)
     .map((key, index) => {
-      arr.push(auxData[key]);
+      arr.push(data[key]);
       return `${key} = $${index + 1}`;
     })
-    .join(' AND ');
-  const str = `SELECT * FROM ${table} ${
-    auxArr.length > 0 ? 'WHERE ' + valColumn : ''
+    .join(', ');
+
+  // const auxArr = Object.keys(auxData);
+  // const valColumn = auxArr
+  //   .map((key, index) => {
+  //     arr.push(auxData[key]);
+  //     return `${key} = $${index + 1}`;
+  //   })
+  //   .join(' AND ');
+  const str = `SELECT ${fields.join(', ')} FROM ${req.params.table} ${
+    arr.length > 0 ? 'WHERE ' + conditions : ''
   }`;
-  // const auxStr =
-  //   'SELECT * FROM cars_categories as a ' +
-  //   'JOIN cars as b ' +
-  //   'ON b._id = a.cars_id ' +
-  //   'JOIN categories as c ' +
-  //   'ON c._id = a.categories_id ' +
-  //   `${auxArr.length > 0 ? 'WHERE ' + valColumn : ''}`;
+  // //@ts-expect-error
+  // } ${access === 'self' ? ' AND users_id = ' + req.user.id : ''}`;
 
   return { str, arr };
 };
 
-const newArgs = async (table: string, data: any, role = 1) => {
-  const auxData =
-    table === 'users'
-      ? { ...data, password: await encrypter(data.password) }
-      : { ...data };
-  const columns = Object.keys(auxData).join(',');
-  const values = Object.values(auxData);
-  const valColumn = Object.values(auxData)
-    .map((_, i) => `$${i + 1}`)
-    .join(',');
-  const strColumns =
-    table === 'users' ? `(${columns}, roles_id)` : `(${columns})`;
-  const strValColumns =
-    table === 'users'
-      ? `(${valColumn},$${values.length + 1})`
-      : `(${valColumn})`;
-  const argValues = table === 'users' ? [...values, role] : values;
-  return {
-    str: `INSERT INTO ${table} ${strColumns} VALUES ${strValColumns} RETURNING *`,
-    arr: argValues,
-  };
+const newArgs = async (req: Request) => {
+  //@ts-expect-error
+  const { fields } = req.tabledescription;
+  const data = { ...req.body };
+
+  const arr: any[] = [];
+
+  const columns = Object.keys(data)
+    .map((key) => {
+      arr.push(data[key]);
+      return key;
+    })
+    .join(', ');
+
+  const str = `INSERT INTO ${req.params.table} (${columns}) VALUES (${arr.map(
+    (item, index) => '$' + (index + 1)
+  )}) RETURNING ${fields
+    .filter((item: string) => item !== 'password')
+    .join(', ')}`;
+
+  return { str, arr };
 };
 
 const upArgs = (table: string, id: string, data: any) => {
@@ -168,24 +118,24 @@ const upArgs = (table: string, id: string, data: any) => {
     .map((key) => `${key}='${auxData[key]}'`)
     .join(',');
   const columns = Object.keys(auxData).join(',');
-  const what = limitForTable(table);
+  // const what = limitForTable(table);
 
-  const activeCond = what('updateOne');
-  // table === 'users' || table === 'customers' || table === 'cars'
-  //   ? 'AND active=true'
-  //   : '';
+  const activeCond =
+    table === 'users' || table === 'customers' || table === 'cars'
+      ? 'AND active=true'
+      : '';
   const arr = [id];
   const str = `UPDATE ${table} SET ${valColumn}, updated_at = NOW() WHERE _id=$1 ${activeCond} RETURNING _id,${columns}`;
 
   return { str, arr };
 };
 const delArgs = (table: string, id: string) => {
-  const what = limitForTable(table);
+  // const what = limitForTable(table);
 
-  const usersStr = what('delOne');
-  // table === 'users' || table === 'customers' || table === 'cars'
-  //   ? 'AND active=true'
-  //   : '';
+  const usersStr =
+    table === 'users' || table === 'customers' || table === 'cars'
+      ? 'AND active=true'
+      : '';
   const str = `UPDATE ${table} SET active = false, updated_at = NOW() ${
     table === 'users' ? ',email_e=email,email=""' : ''
   } WHERE _id=$1 ${usersStr} RETURNING _id, updated_at as delete_at`;
@@ -193,4 +143,4 @@ const delArgs = (table: string, id: string) => {
   return { arr, str };
 };
 
-export { getString, newArgs, upArgs, someArgs, allArgs, delArgs, oneIdArgs };
+export { getString, newArgs, upArgs, someArgs, allArgs, delArgs, oneArgs };

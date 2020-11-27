@@ -1,16 +1,12 @@
 import jwt from 'jsonwebtoken';
-import { RequestHandler, Request } from 'express';
+import { RequestHandler } from 'express';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { appRoles } from './roles';
 import { store } from '../store/store';
+import { appTables } from '../store/tables';
 
 const authentication: RequestHandler = (req, res, next) => {
-  // Omit login
-  if (req.url === '/login') {
-    return next();
-  }
-  // Omit signup
-  if (req.params.table === 'users' && req.method === 'POST') {
+  // Omit login & signup
+  if (['/login', '/signup'].includes(req.url)) {
     return next();
   }
   if (!req.headers.authorization) {
@@ -31,48 +27,71 @@ const authentication: RequestHandler = (req, res, next) => {
 };
 
 const authorization: RequestHandler = (req, res, next) => {
-  // Omit login
-  if (req.url === '/login') {
+  // Omit login & signup
+  if (['/login', '/signup'].includes(req.url)) {
+    //@ts-expect-error
+    req.tabledescription = {
+      fields: ['_id', 'roles_id', 'nick', 'password', 'email', 'img_url'],
+      access: 'all',
+    };
     return next();
   }
-  // Omit signup
-  if (req.params.table === 'users' && req.method === 'POST') {
-    return next();
-  }
+
+  // From store get valid roles and compare with user request
   store
     .roles()
     .then((data: { _id: number; description: string }[]) => {
-      // From store get valid roles and compare with user request
+      // Get the description role for actual request
       //@ts-expect-error
       const actualRole = data.find((item) => item._id === +req.user.roles);
       if (!actualRole) {
         throw new ErrorResponse(403, 'Unauthorized');
       }
 
-      // From appRoles auxiliar object find the conditions available for actual request
-      const constraints = appRoles.find(
-        (item) => item.role === actualRole.description
-      );
-      if (!constraints) {
-        throw new ErrorResponse(403, 'Unauthorized');
-      }
-
-      // Validate if the appRoles includes persmissions to url request
-      const permissions = constraints.tables.find(
+      // From appTables auxiliar object find the conditions available for actual request
+      const tableDescription = appTables.find(
         (item) => item.table === req.url.split('/')[1]
       );
-      if (!permissions) {
+      if (!tableDescription) {
         throw new ErrorResponse(403, 'Unauthorized');
       }
 
-      // Validate if the appRoles includes persmissions to method request
-      if (!permissions.methods.includes(req.method)) {
+      // From tableDescription obtain permisssions info
+      const actualInfo = tableDescription.permissions.find(
+        (item) => item.type === actualRole.description
+      );
+      if (!actualInfo) {
         throw new ErrorResponse(403, 'Unauthorized');
       }
+
+      // Validate authorization method for actual request
+      if (!actualInfo.methods.includes(req.method)) {
+        throw new ErrorResponse(403, 'Unauthorized');
+      }
+
+      // const constraints = appRoles.find(
+      //   (item) => item.role === actualRole.description
+      // );
+
+      // // Validate if the appRoles includes persmissions to url request
+      // const permissions = constraints.tables.find(
+      //   (item) => item.table === req.url.split('/')[1]
+      // );
+      // if (!permissions) {
+      //   throw new ErrorResponse(403, 'Unauthorized');
+      // }
+
+      // // Validate if the appRoles includes persmissions to method request
+      // if (!permissions.methods.includes(req.method)) {
+      //   throw new ErrorResponse(403, 'Unauthorized');
+      // }
 
       //@ts-expect-error
-      req.deliveredResults = permissions.constraints;
-      next();
+      req.tabledescription = {
+        fields: tableDescription.fields,
+        access: actualInfo.access,
+      };
+      return next();
     })
     .catch(next);
 };
