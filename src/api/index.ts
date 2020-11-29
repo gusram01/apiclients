@@ -1,4 +1,4 @@
-import { store } from '../store/store';
+import { db } from '../store/database';
 import Controller from './controller';
 
-export default Controller(store);
+export default Controller(db);
