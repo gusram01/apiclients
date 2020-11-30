@@ -22,6 +22,15 @@ const errorHandler = (
       )}`
     );
   }
+  if (err.message.includes('violates not-null constraint')) {
+    error = new ErrorResponse(
+      400,
+      `${err.message.replace(
+        'violates not-null constraint',
+        'Please send complete info!! '
+      )}`
+    );
+  }
   if (err.message.includes('invalid input syntax')) {
     error = new ErrorResponse(
       400,

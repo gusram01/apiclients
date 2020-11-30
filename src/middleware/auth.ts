@@ -1,46 +1,55 @@
 import jwt from 'jsonwebtoken';
 import { RequestHandler } from 'express';
 import { ErrorResponse } from '../utils/ErrorResponse';
-import { store } from '../store/store';
+
 import { appTables } from '../store/tables';
+import Controller from '../api/index';
 
 const authentication: RequestHandler = (req, res, next) => {
+  //
   // Omit login & signup
   if (['/login', '/signup'].includes(req.url)) {
     return next();
   }
+
+  // Omit email/nick validates
+  if (req.url.includes('/validate')) {
+    return next();
+  }
+
   if (!req.headers.authorization) {
     throw new ErrorResponse(401, 'Access denied');
   }
-  if (req.headers.authorization.includes('Bearer')) {
-    // @ts-expect-error
-    req.user = jwt.verify(
-      req.headers.authorization.split(' ')[1],
-      process.env.KEYSECRET_JWT!
-    );
-    // @ts-expect-error
-    if (req.user.exp >= new Date().getTime() / 1000) {
-      return next();
-    }
+
+  if (!req.headers.authorization.includes('Bearer')) {
+    throw new ErrorResponse(401, 'Access denied');
   }
-  throw new ErrorResponse(401, 'Access denied');
+
+  // @ts-expect-error
+  req.user = jwt.verify(
+    req.headers.authorization.split(' ')[1],
+    process.env.KEYSECRET_JWT!
+  );
+
+  // @ts-expect-error
+  if (req.user.exp >= new Date().getTime() / 1000) {
+    return next();
+  }
 };
 
 const authorization: RequestHandler = (req, res, next) => {
   // Omit login & signup
   if (['/login', '/signup'].includes(req.url)) {
-    //@ts-expect-error
-    req.tabledescription = {
-      fields: ['_id', 'roles_id', 'nick', 'password', 'email', 'img_url'],
-      access: 'all',
-    };
+    return next();
+  }
+  // Omit email/nick validates
+  if (req.url.includes('/validate')) {
     return next();
   }
 
   // From store get valid roles and compare with user request
-  store
-    .roles()
-    .then((data: { _id: number; description: string }[]) => {
+  Controller.roles(req)
+    .then((data: { id: string; description: string }[]) => {
       // Get the description role for actual request
       //@ts-expect-error
       const actualRole = data.find((item) => item._id === +req.user.roles);
@@ -69,26 +78,8 @@ const authorization: RequestHandler = (req, res, next) => {
         throw new ErrorResponse(403, 'Unauthorized');
       }
 
-      // const constraints = appRoles.find(
-      //   (item) => item.role === actualRole.description
-      // );
-
-      // // Validate if the appRoles includes persmissions to url request
-      // const permissions = constraints.tables.find(
-      //   (item) => item.table === req.url.split('/')[1]
-      // );
-      // if (!permissions) {
-      //   throw new ErrorResponse(403, 'Unauthorized');
-      // }
-
-      // // Validate if the appRoles includes persmissions to method request
-      // if (!permissions.methods.includes(req.method)) {
-      //   throw new ErrorResponse(403, 'Unauthorized');
-      // }
-
       //@ts-expect-error
       req.tabledescription = {
-        fields: tableDescription.fields,
         access: actualInfo.access,
       };
       return next();
