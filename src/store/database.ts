@@ -31,7 +31,7 @@ const initOptions: IInitOptions<IExtensions> = {
     obj.models = new ModelsRepository(obj, pgp);
     obj.brands = new BrandsRepository(obj, pgp);
     obj.roles = new RolesRepository(obj, pgp);
-    obj.carsCategories = new CarsCategoriesRepository(obj, pgp);
+    obj.cars_categories = new CarsCategoriesRepository(obj, pgp);
   },
 };
 

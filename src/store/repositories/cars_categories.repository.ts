@@ -12,7 +12,7 @@ export class CarsCategoriesRepository extends Repository {
   }
 
   getAll(req: Request): Promise<Partial<CarsCategories>[]> {
-    return this.db.manyOrNone(
+    return this.db.many(
       `SELECT c._id, cars.description as car, cat.description as
        category
        FROM cars_categories as c
@@ -28,23 +28,25 @@ export class CarsCategoriesRepository extends Repository {
 
     if (flag.length > 0) {
       str = ` WHERE ${flag
-        .map((key) => 'c.' + key + " LIKE '%" + query[key] + "%'")
-        .join(' , ')} AND c.active = $<active>`;
+        .map((key) => key + " LIKE '%" + query[key] + "%'")
+        .join(' , ')}`;
     } else {
-      str = ' WHERE c.active = $<active>';
+      str = '';
     }
-    return this.db.manyOrNone(
+    return this.db.many(
       `SELECT c._id, cars.description as car, cat.description as
        category
        FROM cars_categories as c
        JOIN cars ON c.cars_id = cars._id
-       JOIN categories as cat ON c.categories_id = cat._id`
+       JOIN categories as cat ON c.categories_id = cat._id
+       ${str}`,
+      flag.length > 0 ? { ...query } : {}
     );
   }
 
   oneById(req: Request): Promise<any | null> {
     const id = req.params.id;
-    return this.db.oneOrNone(
+    return this.db.one(
       `SELECT ${this.columns} FROM ${this.table} WHERE _id = $1`,
       id
     );
@@ -62,7 +64,7 @@ export class CarsCategoriesRepository extends Repository {
   updateById(req: Request): Promise<Partial<CarsCategories> | null> {
     const id = req.params.id;
     const { cars_id, categories_id } = req.body;
-    return this.db.oneOrNone(
+    return this.db.one(
       `UPDATE ${this.table} SET cars_id = $1, categories_id = $2 WHERE _id = $3 RETURNING _id`,
       [cars_id, categories_id, id]
     );
@@ -70,7 +72,7 @@ export class CarsCategoriesRepository extends Repository {
 
   deleteById(req: Request): Promise<Partial<CarsCategories> | null> {
     const id = req.params.id;
-    return this.db.oneOrNone(
+    return this.db.one(
       `DELETE FROM ${this.table} WHERE _id = $1 RETURNING _id`,
       id
     );

@@ -17,7 +17,7 @@ interface IExtensions {
   models: ModelsRepository;
   brands: BrandsRepository;
   roles: RolesRepository;
-  carsCategories: CarsCategoriesRepository;
+  cars_categories: CarsCategoriesRepository;
 }
 
 export {

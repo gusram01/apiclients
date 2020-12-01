@@ -7,6 +7,58 @@ import router from '../api/router';
 import { errorHandler } from '../network/errorResponse';
 import { authentication, authorization } from '../middleware/auth';
 
+interface ReqUser {
+  id: string;
+  email: string;
+  roles: string;
+}
+
+export class MyContext {
+  private _id: string;
+  private _email: string;
+  private _roles: string;
+  private _iat: number;
+  private _exp: number;
+
+  constructor(
+    id: string,
+    email: string,
+    roles: string,
+    iat: number,
+    exp: number
+  ) {
+    this._id = id;
+    this._email = email;
+    this._roles = roles;
+    this._iat = iat;
+    this._exp = exp;
+  }
+
+  public get id(): string {
+    return this._id;
+  }
+  public get email(): string {
+    return this._email;
+  }
+  public get roles(): string {
+    return this._roles;
+  }
+  public get iat(): number {
+    return this._iat;
+  }
+  public get exp(): number {
+    return this._exp;
+  }
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      user: MyContext;
+    }
+  }
+}
+
 const app = express();
 const swaggerDoc = require('../swagger.json');
 

@@ -20,7 +20,7 @@ export class CarsRepository extends Repository {
   }
 
   getAll(req: Request): Promise<Partial<Cars>[]> {
-    return this.db.manyOrNone(
+    return this.db.many(
       `SELECT c._id, price, b.description as brand, m.description as
        model, v.description as version
        FROM cars as c
@@ -45,7 +45,7 @@ export class CarsRepository extends Repository {
       str = ' WHERE c.active = $<active>';
     }
 
-    return this.db.manyOrNone(
+    return this.db.many(
       `SELECT c._id, c.price, c.description as car_description, b.description as brand, m.description as
        model, v.description as version
        FROM cars as c

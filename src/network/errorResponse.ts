@@ -40,6 +40,24 @@ const errorHandler = (
       )}`
     );
   }
+  if (err.message.includes('No data returned from the query')) {
+    error = new ErrorResponse(
+      404,
+      `${err.message.replace(
+        'No data returned from the query',
+        'Try with another parameter: << REMEMBER case sensitive >>'
+      )}`
+    );
+  }
+  if (err.message.includes('missing FROM-clause entry for table')) {
+    error = new ErrorResponse(
+      404,
+      `${err.message.replace(
+        'missing FROM-clause entry for table',
+        `Please check table name: << REMEMBER case sensitive >>`
+      )}`
+    );
+  }
 
   return errorResponse(error, res);
 };

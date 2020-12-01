@@ -16,7 +16,7 @@ export class Repository {
   }
 
   getAll(req: Request): Promise<any[]> {
-    return this.db.manyOrNone(
+    return this.db.many(
       `SELECT ${this.columns.join(' , ')} FROM ${
         this.table
       } WHERE active = $<active>`,
@@ -36,7 +36,7 @@ export class Repository {
     } else {
       str = ' WHERE active = $<active>';
     }
-    return this.db.manyOrNone(
+    return this.db.many(
       `SELECT ${this.columns} FROM ${this.table} ${str}`,
       flag.length > 0 ? { ...query, active: true } : { active: true }
     );
@@ -44,7 +44,7 @@ export class Repository {
 
   oneById(req: Request): Promise<any | null> {
     const id = req.params.id;
-    return this.db.oneOrNone(
+    return this.db.one(
       `SELECT ${this.columns} FROM ${this.table} WHERE _id = $<id> AND active = $<active>`,
       { id, active: true }
     );
@@ -56,7 +56,7 @@ export class Repository {
     };
     delete data._id;
 
-    return this.db.oneOrNone(
+    return this.db.one(
       `INSERT INTO ${this.table} (${Object.keys(data).join(
         ' , '
       )}) VALUES(${Object.keys(data)
@@ -85,7 +85,7 @@ export class Repository {
 
   deleteById(req: Request): Promise<any> {
     const id = req.params.id;
-    return this.db.oneOrNone(
+    return this.db.one(
       `UPDATE ${this.table} SET active = $<active>, updated_at = $<updated_at> WHERE _id = $<id> RETURNING _id, updated_at as deleted_at`,
       { updated_at: 'NOW()', active: false, id }
     );

@@ -14,7 +14,7 @@ type ValidTables =
   | 'models'
   | 'versions'
   | 'roles'
-  | 'carsCategories';
+  | 'cars_categories';
 
 const Controller = (db: ExtendedProtocol) => {
   const getAll = async (req: Request) => {

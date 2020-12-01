@@ -106,7 +106,7 @@ export class UsersRepository extends Repository {
     key: string;
     value: string;
   }): Promise<Partial<Users> | null> {
-    return this.db.oneOrNone(
+    return this.db.one(
       `SELECT email, nick FROM users WHERE ${item.key}=$1 AND active = $2`,
       [item.value, true]
     );
@@ -114,7 +114,7 @@ export class UsersRepository extends Repository {
 
   login(req: Request): Promise<Partial<Users> | null> {
     const { email } = req.body;
-    return this.db.oneOrNone(
+    return this.db.one(
       'SELECT _id,email,password,nick,roles_id FROM users WHERE email=$1 AND active = true',
       email
     );

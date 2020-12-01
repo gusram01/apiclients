@@ -3,6 +3,7 @@ import { RequestHandler } from 'express';
 import { ErrorResponse } from '../utils/ErrorResponse';
 
 import { appTables } from '../store/tables';
+import { MyContext } from '../server/app';
 import Controller from '../api/index';
 
 const authentication: RequestHandler = (req, res, next) => {
@@ -25,13 +26,11 @@ const authentication: RequestHandler = (req, res, next) => {
     throw new ErrorResponse(401, 'Access denied');
   }
 
-  // @ts-expect-error
   req.user = jwt.verify(
     req.headers.authorization.split(' ')[1],
     process.env.KEYSECRET_JWT!
-  );
+  ) as MyContext;
 
-  // @ts-expect-error
   if (req.user.exp >= new Date().getTime() / 1000) {
     return next();
   }
@@ -49,9 +48,8 @@ const authorization: RequestHandler = (req, res, next) => {
 
   // From store get valid roles and compare with user request
   Controller.roles(req)
-    .then((data: { id: string; description: string }[]) => {
+    .then((data: { _id: number; description: string }[]) => {
       // Get the description role for actual request
-      //@ts-expect-error
       const actualRole = data.find((item) => item._id === +req.user.roles);
       if (!actualRole) {
         throw new ErrorResponse(403, 'Unauthorized');

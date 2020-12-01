@@ -1,5 +1,5 @@
 import Controller from './index';
-import { RequestHandler, Router } from 'express';
+import { RequestHandler, Router, Request } from 'express';
 import { successResponse } from '../network/successResponse';
 
 const router = Router();
