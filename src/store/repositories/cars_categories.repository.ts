@@ -17,7 +17,8 @@ export class CarsCategoriesRepository extends Repository {
        category
        FROM cars_categories as c
        JOIN cars ON c.cars_id = cars._id
-       JOIN categories as cat ON c.categories_id = cat._id`
+       JOIN categories as cat ON c.categories_id = cat._id
+       GROUP BY category`
     );
   }
 
@@ -39,6 +40,7 @@ export class CarsCategoriesRepository extends Repository {
        FROM cars_categories as c
        JOIN cars ON c.cars_id = cars._id
        JOIN categories as cat ON c.categories_id = cat._id
+       GROUP BY category
        ${str}`,
       flag.length > 0 ? { ...query } : {}
     );

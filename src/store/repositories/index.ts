@@ -7,6 +7,8 @@ import { VersionsRepository } from './versions.repository';
 import { CategoriesRepository } from './categories.repository';
 import { RolesRepository } from './roles.repository';
 import { CarsCategoriesRepository } from './cars_categories.repository';
+import { CarsCustomersRepository } from './cars_customers.repository';
+import { UsersCustomersRepository } from './users_customers.repository';
 
 interface IExtensions {
   users: UsersRepository;
@@ -18,6 +20,8 @@ interface IExtensions {
   brands: BrandsRepository;
   roles: RolesRepository;
   cars_categories: CarsCategoriesRepository;
+  cars_customers: CarsCustomersRepository;
+  users_customers: UsersCustomersRepository;
 }
 
 export {
@@ -31,4 +35,6 @@ export {
   BrandsRepository,
   RolesRepository,
   CarsCategoriesRepository,
+  CarsCustomersRepository,
+  UsersCustomersRepository,
 };

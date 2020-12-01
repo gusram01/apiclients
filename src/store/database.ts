@@ -12,6 +12,8 @@ import {
   BrandsRepository,
   RolesRepository,
   CarsCategoriesRepository,
+  CarsCustomersRepository,
+  UsersCustomersRepository,
 } from './repositories';
 
 type ExtendedProtocol = IDatabase<IExtensions> & IExtensions;
@@ -32,6 +34,8 @@ const initOptions: IInitOptions<IExtensions> = {
     obj.brands = new BrandsRepository(obj, pgp);
     obj.roles = new RolesRepository(obj, pgp);
     obj.cars_categories = new CarsCategoriesRepository(obj, pgp);
+    obj.cars_customers = new CarsCustomersRepository(obj, pgp);
+    obj.users_customers = new UsersCustomersRepository(obj, pgp);
   },
 };
 
