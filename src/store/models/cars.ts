@@ -4,6 +4,7 @@ export interface Cars {
   models_id: number;
   versions_id: number;
   price: number;
+  description: string;
   active?: boolean;
   created_at?: Date;
   updated_at?: Date;

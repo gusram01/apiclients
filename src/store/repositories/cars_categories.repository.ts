@@ -1,30 +1,49 @@
 import { Request } from 'express';
 import { IDatabase, IMain } from 'pg-promise';
 import { CarsCategories } from '../models/cars_categories';
+import { Repository } from './repository';
 
-export class CarsCategoriesRepository {
-  private columns = '_id, cars_id, categories_id';
-  private table = 'cars_categories';
+export class CarsCategoriesRepository extends Repository {
+  protected columns = ['_id', 'cars_id', 'categories_id'];
 
-  constructor(private db: IDatabase<any>, private pgp: IMain) {
-    this.db = db;
-    this.pgp = pgp;
+  constructor(db: IDatabase<any>, pgp: IMain) {
+    super(db, pgp, 'cars_categories');
+    this.columns = ['_id', 'cars_id', 'categories_id'];
   }
 
   getAll(req: Request): Promise<Partial<CarsCategories>[]> {
-    return this.db.manyOrNone(`SELECT ${this.columns} FROM ${this.table}`);
-  }
-
-  getSome(req: Request): Promise<Partial<CarsCategories>[]> {
-    const name = req.query.name;
     return this.db.manyOrNone(
-      `SELECT ${this.columns} FROM ${this.table} WHERE name LIKE '${name}%'`
+      `SELECT c._id, cars.description as car, cat.description as
+       category
+       FROM cars_categories as c
+       JOIN cars ON c.cars_id = cars._id
+       JOIN categories as cat ON c.categories_id = cat._id`
     );
   }
 
-  oneById(req: Request): Promise<Partial<CarsCategories> | null> {
-    const id = req.params.id;
+  getSome(req: Request): Promise<Partial<CarsCategories>[]> {
+    const query = req.query;
+    const flag = Object.keys(query);
+    let str: string;
 
+    if (flag.length > 0) {
+      str = ` WHERE ${flag
+        .map((key) => 'c.' + key + " LIKE '%" + query[key] + "%'")
+        .join(' , ')} AND c.active = $<active>`;
+    } else {
+      str = ' WHERE c.active = $<active>';
+    }
+    return this.db.manyOrNone(
+      `SELECT c._id, cars.description as car, cat.description as
+       category
+       FROM cars_categories as c
+       JOIN cars ON c.cars_id = cars._id
+       JOIN categories as cat ON c.categories_id = cat._id`
+    );
+  }
+
+  oneById(req: Request): Promise<any | null> {
+    const id = req.params.id;
     return this.db.oneOrNone(
       `SELECT ${this.columns} FROM ${this.table} WHERE _id = $1`,
       id
@@ -34,8 +53,8 @@ export class CarsCategoriesRepository {
   async add(req: Request): Promise<Partial<CarsCategories>> {
     const { cars_id, categories_id } = req.body;
     return this.db.one(
-      `INSERT INTO ${this.table} (cars_id, categories_id) VALUES($1, $2) RETURNING _id`,
-      [cars_id, categories_id],
+      `INSERT INTO ${this.table} (cars_id, categories_id) VALUES($<cars_id>, $<categories_id>) RETURNING _id`,
+      { cars_id, categories_id },
       (a) => ({ _id: a._id })
     );
   }

@@ -58,9 +58,6 @@ const Controller = (db: ExtendedProtocol) => {
 
   const newOne = async (req: Request) => {
     const table = req.params.table as ValidTables;
-    if (table === 'users') {
-      return signup(req);
-    }
     try {
       const rows = await db[table].add(req);
       if (!rows) {

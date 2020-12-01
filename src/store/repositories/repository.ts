@@ -38,7 +38,7 @@ export class Repository {
     }
     return this.db.manyOrNone(
       `SELECT ${this.columns} FROM ${this.table} ${str}`,
-      { active: true }
+      flag.length > 0 ? { ...query, active: true } : { active: true }
     );
   }
 

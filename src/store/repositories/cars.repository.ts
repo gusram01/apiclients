@@ -1,85 +1,77 @@
 import { Request } from 'express';
 import { IDatabase, IMain } from 'pg-promise';
 import { Cars } from '../models/cars';
+import { Repository } from './repository';
 
-export class CarsRepository {
-  private columns = '_id, brands_id, models_id, versions_id, price, created_at';
+export class CarsRepository extends Repository {
+  protected columns: string[];
 
-  constructor(private db: IDatabase<any>, private pgp: IMain) {
-    this.db = db;
-    this.pgp = pgp;
+  constructor(db: IDatabase<any>, pgp: IMain) {
+    super(db, pgp, 'cars');
+    this.columns = [
+      '_id',
+      'brands_id',
+      'models_id',
+      'versions_id',
+      'price',
+      'description',
+      'created_at',
+    ];
   }
 
   getAll(req: Request): Promise<Partial<Cars>[]> {
     return this.db.manyOrNone(
-      `SELECT ${this.columns} FROM cars WHERE active = $<active>`,
+      `SELECT c._id, price, b.description as brand, m.description as
+       model, v.description as version
+       FROM cars as c
+       JOIN brands as b ON c.brands_id = b._id
+       JOIN models as m ON c.models_id = m._id
+       JOIN versions as v ON c.versions_id = v._id
+       WHERE c.active = $<active>`,
       { active: true }
     );
   }
 
   getSome(req: Request): Promise<Partial<Cars>[]> {
     const query = req.query;
+    const flag = Object.keys(query);
+    let str: string;
+
+    if (flag.length > 0) {
+      str = ` WHERE ${flag
+        .map((key) => 'c.' + key + " LIKE '%" + query[key] + "%'")
+        .join(' , ')} AND c.active = $<active>`;
+    } else {
+      str = ' WHERE c.active = $<active>';
+    }
+
     return this.db.manyOrNone(
-      `SELECT ${this.columns} FROM cars WHERE active = $<active> ${
-        !query
-          ? ''
-          : ' AND ' +
-            Object.keys(query).map((key) => key + " LIKE '" + query[key] + "%'")
-      }`,
-      { active: true }
-    );
-  }
-
-  oneById(req: Request): Promise<Partial<Cars>> {
-    const id = req.params.id;
-
-    return this.db.one(
-      `SELECT ${this.columns} FROM cars WHERE active = $<active> AND _id = $<id>`,
-      { id, active: true }
+      `SELECT c._id, c.price, c.description as car_description, b.description as brand, m.description as
+       model, v.description as version
+       FROM cars as c
+       JOIN brands as b ON c.brands_id = b._id
+       JOIN models as m ON c.models_id = m._id
+       JOIN versions as v ON c.versions_id = v._id ${str}`,
+      flag.length > 0 ? { ...query, active: true } : { active: true }
     );
   }
 
   async add(req: Request): Promise<Partial<Cars>> {
-    const car = req.body;
     const newCar = {
-      ...car,
+      ...req.body,
       active: true,
+      description: req.body.description.toUpperCase(),
     };
     delete newCar._id;
 
     return this.db.one(
-      `INSERT INTO cars (${Object.keys(newCar).join(
+      `INSERT INTO ${this.table} (${Object.keys(newCar).join(
         ' , '
       )}) VALUES(${Object.keys(newCar)
         .map((key: string) => '$<' + key + '>')
-        .join(' , ')}) RETURNING _id, price`,
+        .join(' , ')}) RETURNING _id,description, price`,
       newCar,
       (a) => ({ _id: a._id, price: a.price })
-    );
-  }
-
-  updateById(req: Request): Promise<Partial<Cars>> {
-    const id = req.params.id;
-    const data = req.body;
-    const updatedData = { ...data };
-
-    delete updatedData._id;
-    delete updatedData.active;
-    delete updatedData.created_at;
-
-    return this.db.one(
-      `UPDATE cars SET ${Object.keys(updatedData).map(
-        (key) => key + ' = $<' + key + '>'
-      )} , updated_at = $<updated_at> WHERE _id = $<id> AND active = $<active> RETURNING _id`,
-      { ...updatedData, updated_at: 'NOW()', active: true, id }
-    );
-  }
-
-  deleteById(req: Request): Promise<Partial<Cars>> {
-    const id = req.params.id;
-    return this.db.one(
-      'UPDATE cars SET active = $<active>, updated_at = $<updated_at>, email_e = email , email = null WHERE _id = $<id> AND active = true RETURNING _id, updated_at as deleted_at',
-      { updated_at: 'NOW()', active: false, id }
     );
   }
 }
