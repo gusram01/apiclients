@@ -3,9 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import swaggerUI from 'swagger-ui-express';
-import router from '../api/router';
+import router from './index.routes';
 import { errorHandler } from '../network/errorResponse';
-import { authentication, authorization } from '../middleware/auth';
 
 interface ReqUser {
   id: string;
@@ -69,7 +68,7 @@ app.use(cors());
 app.use(cookieParser());
 
 // Routes
-app.use('/api', authentication, authorization, router);
+app.use('/api', router);
 app.use('/', swaggerUI.serve, swaggerUI.setup(swaggerDoc));
 
 // Error handler

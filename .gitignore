@@ -1,6 +1,10 @@
 node_modules/
+copy/
 production.env
 development.env
 .env
 dist/
 src/server/file.sql
+src/server/models.sql
+src/server/versions.sql
+src/server/cars.sql

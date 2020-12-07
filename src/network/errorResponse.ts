@@ -22,6 +22,18 @@ const errorHandler = (
       )}`
     );
   }
+  if (err.message.includes('operator does not exist')) {
+    error = new ErrorResponse(400, 'Search only by description or year');
+  }
+  if (
+    err.message.includes('column') &&
+    err.message.includes('does not exist')
+  ) {
+    error = new ErrorResponse(
+      400,
+      `${err.message.split(' ').splice(1, 1)} is not a valid search term`
+    );
+  }
   if (err.message.includes('violates not-null constraint')) {
     error = new ErrorResponse(
       400,
@@ -33,7 +45,7 @@ const errorHandler = (
   }
   if (err.message.includes('invalid input syntax')) {
     error = new ErrorResponse(
-      400,
+      404,
       `${err.message.replace(
         'invalid input syntax for type uuid',
         'ID IS NOT CORRECT'
