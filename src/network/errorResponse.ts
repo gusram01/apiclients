@@ -22,6 +22,7 @@ const errorHandler = (
       )}`
     );
   }
+
   if (err.message.includes('operator does not exist')) {
     error = new ErrorResponse(400, 'Search only by description or year');
   }
@@ -43,7 +44,7 @@ const errorHandler = (
       )}`
     );
   }
-  if (err.message.includes('invalid input syntax')) {
+  if (err.message.includes('invalid input syntax for type')) {
     error = new ErrorResponse(
       404,
       `${err.message.replace(
@@ -52,12 +53,16 @@ const errorHandler = (
       )}`
     );
   }
+  if (err.message.includes('invalid input syntax for')) {
+    console.log('otra cola');
+    error = new ErrorResponse(404, 'ID IS NOT CORRECT');
+  }
   if (err.message.includes('No data returned from the query')) {
     error = new ErrorResponse(
       404,
       `${err.message.replace(
         'No data returned from the query',
-        'Try with another parameter: << REMEMBER case sensitive >>'
+        'Data not found: << REMEMBER case sensitive >>'
       )}`
     );
   }

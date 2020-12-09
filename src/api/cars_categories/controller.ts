@@ -3,11 +3,13 @@ import { ExtendedProtocol } from '../../store/database';
 import { ErrorResponse } from '../../utils/ErrorResponse';
 
 const Controller = (db: ExtendedProtocol) => {
-  const table = 'cars';
+  const table = 'cars_categories';
 
   const some = async (req: Request) => {
+    const data = { ...req.query } as any;
+    console.log(data);
     try {
-      const rows = await db.cars.find({ ...req.query, active: true });
+      const rows = await db.cars_categories.find(data);
       if (!rows || rows.length === 0) {
         throw new ErrorResponse(404, 'Data not found');
       }
@@ -20,7 +22,7 @@ const Controller = (db: ExtendedProtocol) => {
   const findById = async (req: Request) => {
     const _id = req.params.id;
     try {
-      const rows = await db.cars.findById(_id);
+      const rows = await db.cars_categories.findById(_id);
       if (!rows) {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
@@ -31,15 +33,10 @@ const Controller = (db: ExtendedProtocol) => {
   };
 
   const create = async (req: Request) => {
-    const { _id, description, ...car } = req.body;
-    const newCar = {
-      ...car,
-      active: true,
-      description: `${car.brands_id.toUpperCase()} ${car.models_id.toUpperCase()} ${car.versions_id.toUpperCase()}`,
-    };
+    const { _id, ...cars_category } = req.body;
 
     try {
-      const row = await db.create(table, newCar);
+      const row = await db.create(table, cars_category);
       if (!row) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -55,8 +52,8 @@ const Controller = (db: ExtendedProtocol) => {
     const updatedData = { ...req.body };
 
     try {
-      const car = await db.find(table, { active: true, _id });
-      if (!car) {
+      const cars_category = await db.cars_categories.findById(_id);
+      if (!cars_category) {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
 
@@ -74,25 +71,19 @@ const Controller = (db: ExtendedProtocol) => {
     const _id = req.params.id;
 
     try {
-      const car = await db.find(table, { active: true, _id });
-      if (!car) {
+      const cars_category = await db.cars_categories.findById(_id);
+      if (!cars_category) {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
 
-      const deleteCar = {
-        active: false,
-        updated_at: 'now()',
-        email_e: car.email,
-        email: null,
-      };
-      const rows = await db.update(table, deleteCar, _id);
-      if (!rows) {
+      const row = await db.cars_categories.deleteById(_id);
+      if (!row) {
         throw new ErrorResponse(
           500,
           'Oops Something wrong, please try again later'
         );
       }
-      return rows;
+      return row;
     } catch (e) {
       throw new ErrorResponse(e.statusCode || 500, e.message);
     }

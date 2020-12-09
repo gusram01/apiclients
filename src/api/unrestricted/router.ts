@@ -23,6 +23,12 @@ const signup: RequestHandler = (req, res, next) => {
     .catch(next);
 };
 
+const forgot: RequestHandler = (req, res, next) => {
+  Controller.forgot(req)
+    .then((data: any) => successResponse(req, res, data, 200))
+    .catch(next);
+};
+
 router.get('/validate/:key/:value', unique);
 router.post(
   '/login',
@@ -47,6 +53,11 @@ router.post(
     validationFields,
   ],
   signup
+);
+router.post(
+  '/forgotpass',
+  [check('email', 'Valid Email is required').isEmail(), validationFields],
+  forgot
 );
 
 export default router;

@@ -3,6 +3,7 @@ import { Request } from 'express';
 import { ExtendedProtocol } from '../../store/database';
 import { ErrorResponse } from '../../utils/ErrorResponse';
 import { encrypter, getToken } from '../../utils/utilities';
+import { transporter } from '../../mailer/mail';
 
 const Controller = (db: ExtendedProtocol) => {
   const roles = async (req: Request) => {
@@ -57,11 +58,10 @@ const Controller = (db: ExtendedProtocol) => {
   };
 
   const signup = async (req: Request) => {
-    const { _id, password, ...user } = req.body;
+    const { _id, password, valid, active, ...user } = req.body;
     const newUser = {
       ...user,
       password: await encrypter(password),
-      active: true,
       roles_id: 1,
     };
     try {
@@ -83,8 +83,26 @@ const Controller = (db: ExtendedProtocol) => {
     }
   };
 
+  const forgot = async (req: Request) => {
+    const { email } = req.body;
+    try {
+      const info = await transporter.sendMail({
+        from: '"admin" <gram.io.dev@gmail.com>',
+        to: email,
+        subject: 'Forgot password for MyClient-App',
+        text: 'Hello, this is a mail because the password is missing...',
+        html: `<h1>Forgot pass</h1>
+           <p> The new pass is: 9083145jhnegr9877341587(/) </p>`,
+      });
+      return info;
+    } catch (e) {
+      throw new ErrorResponse(e.statusCode || 500, e.message);
+    }
+  };
+
   const isValid = async (req: Request) => {
     const item = req.params as { key: string; value: string };
+    console.log(item);
     try {
       const flag = await db.isValid(item);
       if (!flag) {
@@ -101,6 +119,7 @@ const Controller = (db: ExtendedProtocol) => {
     isValid,
     login,
     signup,
+    forgot,
   };
 };
 

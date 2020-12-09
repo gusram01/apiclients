@@ -1,30 +1,5 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-// import { globalInfo } from './helper';
-
-// const validateInputs = (type: string, data: any) => {
-//   const validator = [];
-//   const some = { ...data };
-//   let flag: boolean;
-//   if (validator.length !== Object.keys(some).length) {
-//     flag = false;
-//   } else {
-//     flag = validator.every((ele) => {
-//       if (!some[ele.id]) {
-//         return false;
-//       }
-//       return (
-//         some[ele.id].length >= ele.constrain.min &&
-//         some[ele.id].length <= ele.constrain.max
-//       );
-//     });
-//   }
-//   return flag;
-// };
-
-// const validateData = (table: string) => {
-//   globalInfo[table];
-// };
 
 const encrypter = async (password: string) => {
   const saltRounds = await bcrypt.genSalt(10);

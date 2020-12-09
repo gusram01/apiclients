@@ -1,7 +1,14 @@
 import pgPromise, { IInitOptions, IMain, QueryFile } from 'pg-promise';
 import { ErrorResponse } from '../utils/ErrorResponse';
 import { IDatabase } from 'pg-promise';
-import { IExtensions, MyConditions } from './repositories';
+import {
+  IExtensions,
+  MyConditions,
+  CarsRepository,
+  CarsCategoriesRepository,
+  CarsCustomersRepository,
+  UsersCustomersRepository,
+} from './repositories';
 
 type ExtendedProtocol = IDatabase<IExtensions> & IExtensions;
 
@@ -12,6 +19,11 @@ const initOptions: IInitOptions<IExtensions> = {
     console.log('DB Online', useCount);
   },
   extend(db: ExtendedProtocol, dc: any) {
+    db.cars = new CarsRepository(db, pgp);
+    db.cars_categories = new CarsCategoriesRepository(db, pgp);
+    db.cars_customers = new CarsCustomersRepository(db, pgp);
+    db.users_customers = new UsersCustomersRepository(db, pgp);
+
     db.find = (
       table: string,
       query?: MyConditions,
@@ -23,7 +35,12 @@ const initOptions: IInitOptions<IExtensions> = {
           .map((key) => key + ' = $<' + key + '>')
           .join(' AND ')}`;
       }
-
+      if (table === 'users') {
+        return db.manyOrNone(
+          `SELECT ${columns.join(' , ')} FROM ${table} ${str}`,
+          !query ? {} : query
+        );
+      }
       return db.many(
         `SELECT ${columns.join(' , ')} FROM ${table} ${str}`,
         !query ? {} : query
@@ -58,48 +75,9 @@ const initOptions: IInitOptions<IExtensions> = {
     };
 
     db.isValid = (item: { key: string; value: string }): Promise<any> =>
-      db.one(
+      db.oneOrNone(
         `SELECT email, nick FROM users WHERE ${item.key}=$1 AND active = $2`,
         [item.value, true]
-      );
-
-    db.findCar = (query?: MyConditions) => {
-      let str = '';
-      if (query && Object.keys(query).length > 0) {
-        str = `WHERE ${Object.keys(query)
-          .map((key) => {
-            return key === 'active'
-              ? 'cars.' + key + ' = $<' + key + '>'
-              : 'cars.' + key + " LIKE '%" + query[key] + "%'";
-          })
-          .join(' AND ')}`;
-      }
-
-      return db.many(
-        `SELECT cars._id, cars.price, cars.year,
-         cars.description as description,
-         brands.description as brand, models.description as
-         model, versions.description as version
-         FROM cars
-         JOIN brands ON cars.brands_id = brands._id
-         JOIN models ON cars.models_id = models._id
-         JOIN versions ON cars.versions_id = versions._id ${str}`,
-        !query ? {} : query
-      );
-    };
-
-    db.findCarById = (id: string) =>
-      db.one(
-        'SELECT cars._id, cars.price, ' +
-          'cars.description as car_description, ' +
-          'brands.description as brand, models.description as ' +
-          'model, versions.description as version ' +
-          'FROM cars ' +
-          'JOIN brands ON cars.brands_id = brands._id ' +
-          'JOIN models ON cars.models_id = models._id ' +
-          'JOIN versions ON cars.versions_id = versions._id ' +
-          'WHERE cars._id = $1 ',
-        id
       );
   },
 };
