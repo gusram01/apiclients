@@ -1,12 +1,15 @@
-import { Request } from 'express';
 import { IDatabase, IMain } from 'pg-promise';
 import { CarsCustomers } from '../models/cars_customers';
 import { MyConditions } from '.';
+import { Repository } from './repository';
 
-export class CarsCustomersRepository {
-  private columns = ['_id', 'cars_id', 'customers_id'];
-  private table = 'cars_customers';
-  constructor(private db: IDatabase<any>, private pgp: IMain) {}
+export class CarsCustomersRepository extends Repository {
+  protected columns: string[];
+
+  constructor(db: IDatabase<any>, pgp: IMain) {
+    super(db, pgp, 'cars_customers');
+    this.columns = ['_id', 'cars_id', 'customers_id'];
+  }
 
   find(query?: MyConditions): Promise<Partial<CarsCustomers>[]> {
     let str = '';
@@ -45,31 +48,6 @@ export class CarsCustomersRepository {
        JOIN cars ON cars_customers.cars_id = cars._id
        JOIN customers ON cars_customers.customers_id = customers._id
        WHERE _id = $1`,
-      id
-    );
-  }
-
-  // async add(req: Request): Promise<Partial<CarsCustomers>> {
-  //   const { cars_id, customers_id } = req.body;
-  //   return this.db.one(
-  //     `INSERT INTO ${this.table} (cars_id, customers_id) VALUES($<cars_id>, $<customers_id>) RETURNING _id`,
-  //     { cars_id, customers_id },
-  //     (a) => ({ _id: a._id })
-  //   );
-  // }
-
-  // updateById(req: Request): Promise<Partial<CarsCustomers> | null> {
-  //   const id = req.params.id;
-  //   const { cars_id, customers_id } = req.body;
-  //   return this.db.one(
-  //     `UPDATE ${this.table} SET cars_id = $1, customers_id = $2 WHERE _id = $3 RETURNING _id`,
-  //     [cars_id, customers_id, id]
-  //   );
-  // }
-
-  deleteById(id: string): Promise<Partial<CarsCustomers> | null> {
-    return this.db.one(
-      `DELETE FROM ${this.table} WHERE _id = $1 RETURNING _id`,
       id
     );
   }

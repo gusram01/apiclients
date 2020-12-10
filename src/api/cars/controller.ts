@@ -3,8 +3,6 @@ import { ExtendedProtocol } from '../../store/database';
 import { ErrorResponse } from '../../utils/ErrorResponse';
 
 const Controller = (db: ExtendedProtocol) => {
-  const table = 'cars';
-
   const some = async (req: Request) => {
     try {
       const rows = await db.cars.find({ ...req.query, active: true });
@@ -39,7 +37,7 @@ const Controller = (db: ExtendedProtocol) => {
     };
 
     try {
-      const row = await db.create(table, newCar);
+      const row = await db.cars.create(newCar);
       if (!row) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -55,12 +53,12 @@ const Controller = (db: ExtendedProtocol) => {
     const updatedData = { ...req.body };
 
     try {
-      const car = await db.find(table, { active: true, _id });
+      const car = await db.cars.find({ active: true, _id });
       if (!car) {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
 
-      const rows = await db.update(table, updatedData, _id);
+      const rows = await db.cars.update(updatedData, _id);
       if (!rows) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -74,7 +72,7 @@ const Controller = (db: ExtendedProtocol) => {
     const _id = req.params.id;
 
     try {
-      const car = await db.find(table, { active: true, _id });
+      const car = await db.cars.find({ active: true, _id });
       if (!car) {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
@@ -82,10 +80,8 @@ const Controller = (db: ExtendedProtocol) => {
       const deleteCar = {
         active: false,
         updated_at: 'now()',
-        email_e: car.email,
-        email: null,
       };
-      const rows = await db.update(table, deleteCar, _id);
+      const rows = await db.cars.update(deleteCar, _id);
       if (!rows) {
         throw new ErrorResponse(
           500,

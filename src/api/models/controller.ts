@@ -4,10 +4,9 @@ import { ErrorResponse } from '../../utils/ErrorResponse';
 
 const Controller = (db: ExtendedProtocol) => {
   const some = async (req: Request) => {
-    const data = { ...req.query } as any;
     try {
-      const rows = await db.cars_customers.find(data);
-      if (!rows || rows.length === 0) {
+      const rows = await db.models.find({ ...req.query, active: true });
+      if (!rows) {
         throw new ErrorResponse(404, 'Data not found');
       }
       return rows;
@@ -19,8 +18,8 @@ const Controller = (db: ExtendedProtocol) => {
   const findById = async (req: Request) => {
     const _id = req.params.id;
     try {
-      const rows = await db.cars_customers.findById(_id);
-      if (!rows) {
+      const rows = await db.models.find({ active: true, _id });
+      if (!rows || rows.length === 0) {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
       return rows;
@@ -30,10 +29,16 @@ const Controller = (db: ExtendedProtocol) => {
   };
 
   const create = async (req: Request) => {
-    const { _id, ...cars_customers } = req.body;
-
+    const { _id, ...data } = req.body;
+    if (!data) {
+      throw new ErrorResponse(400, 'Please send the correct info');
+    }
+    const newData = {
+      ...data,
+      active: true,
+    };
     try {
-      const row = await db.cars_customers.create(cars_customers);
+      const row = await db.models.create(newData);
       if (!row) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -45,20 +50,18 @@ const Controller = (db: ExtendedProtocol) => {
   };
 
   const updateById = async (req: Request) => {
-    const _id = req.params.id;
+    const id = req.params.id;
     const updatedData = { ...req.body };
+    delete updatedData._id;
+    delete updatedData.active;
+    delete updatedData.created_at;
 
     try {
-      const cars_customers = await db.cars_customers.findById(_id);
-      if (!cars_customers) {
-        throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
-      }
-
-      const rows = await db.cars_customers.update(updatedData, _id);
-      if (!rows) {
+      const row = await db.models.update(updatedData, id);
+      if (!row) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
-      return rows;
+      return row;
     } catch (e) {
       throw new ErrorResponse(e.statusCode || 500, e.message);
     }
@@ -66,21 +69,24 @@ const Controller = (db: ExtendedProtocol) => {
 
   const deleteById = async (req: Request) => {
     const _id = req.params.id;
-
     try {
-      const cars_customers = await db.cars_customers.findById(_id);
-      if (!cars_customers) {
-        throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
+      const data = await db.models.find({ active: true, _id });
+      if (!data) {
+        throw new ErrorResponse(404, 'Id Not Found');
       }
 
-      const row = await db.cars_customers.destroy(_id);
-      if (!row) {
+      const deleteUser = {
+        active: false,
+        updated_at: 'now()',
+      };
+      const rows = await db.models.update(deleteUser, _id);
+      if (!rows) {
         throw new ErrorResponse(
           500,
           'Oops Something wrong, please try again later'
         );
       }
-      return row;
+      return rows;
     } catch (e) {
       throw new ErrorResponse(e.statusCode || 500, e.message);
     }

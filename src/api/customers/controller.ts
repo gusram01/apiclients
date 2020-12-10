@@ -3,14 +3,17 @@ import { ExtendedProtocol } from '../../store/database';
 import { ErrorResponse } from '../../utils/ErrorResponse';
 
 const Controller = (db: ExtendedProtocol) => {
-  const table = 'customers';
-
   const some = async (req: Request) => {
+    const users_id = req.user.id;
     try {
-      const rows = await db.find(table, { ...req.query, active: true });
+      const rows = await db.users_customers.customersByUser(users_id, {
+        ...req.query,
+        active: true,
+      });
       if (!rows) {
         throw new ErrorResponse(404, 'Data not found');
       }
+
       return rows;
     } catch (e) {
       throw new ErrorResponse(e.statusCode || 500, e.message);
@@ -18,9 +21,11 @@ const Controller = (db: ExtendedProtocol) => {
   };
 
   const findById = async (req: Request) => {
+    const users_id = req.user.id;
     const _id = req.params.id;
+
     try {
-      const rows = await db.find(table, { active: true, _id });
+      const rows = await db.users_customers.customersById(users_id, _id);
       if (!rows || rows.length === 0) {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
@@ -31,31 +36,23 @@ const Controller = (db: ExtendedProtocol) => {
   };
 
   const create = async (req: Request) => {
+    const users_id = req.user.id;
     const { _id, ...customer } = req.body;
-    if (
-      !customer.firstname &&
-      !customer.lastname &&
-      !customer.curp &&
-      !customer.mobile &&
-      !customer.gender
-    ) {
-      throw new ErrorResponse(400, 'Please send the correct info');
-    }
+
     const newCustomer = {
       ...customer,
       active: true,
     };
     try {
-      const row = await db.create(table, newCustomer, [
-        '_id',
-        'firstname',
-        'lastname',
-        'curp',
-        'gender',
-      ]);
+      const row = await db.customers.create(newCustomer);
       if (!row) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
+
+      await db.users_customers.create({
+        users_id,
+        customers_id: row._id,
+      });
 
       return row;
     } catch (e) {
@@ -71,7 +68,7 @@ const Controller = (db: ExtendedProtocol) => {
     delete updatedData.created_at;
 
     try {
-      const rows = await db.update(table, updatedData, id);
+      const rows = await db.customers.update(updatedData, id);
       if (!rows) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -84,7 +81,7 @@ const Controller = (db: ExtendedProtocol) => {
   const deleteById = async (req: Request) => {
     const _id = req.params.id;
     try {
-      const customer = await db.find(table, { active: true, _id });
+      const customer = await db.customers.find({ active: true, _id });
       if (!customer) {
         throw new ErrorResponse(404, 'Id Not Found');
       }
@@ -92,10 +89,10 @@ const Controller = (db: ExtendedProtocol) => {
       const deleteCustomer = {
         active: false,
         updated_at: 'now()',
-        curp_e: customer.curp,
+        curp_e: customer[0].curp,
         curp: null,
       };
-      const rows = await db.update(table, deleteCustomer, _id);
+      const rows = await db.customers.update(deleteCustomer, _id);
       if (!rows) {
         throw new ErrorResponse(
           500,

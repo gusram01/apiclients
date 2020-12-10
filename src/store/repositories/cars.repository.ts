@@ -1,20 +1,23 @@
 import { IDatabase, IMain } from 'pg-promise';
 import { Cars } from '../models/cars';
 import { MyConditions } from '.';
+import { Repository } from './repository';
 
-export class CarsRepository {
-  private columns = [
-    '_id',
-    'brands_id',
-    'models_id',
-    'versions_id',
-    'price',
-    'description',
-    'created_at',
-  ];
-  private table = 'cars';
+export class CarsRepository extends Repository {
+  protected columns: string[];
 
-  constructor(private db: IDatabase<any>, private pgp: IMain) {}
+  constructor(db: IDatabase<any>, pgp: IMain) {
+    super(db, pgp, 'cars');
+    this.columns = [
+      '_id',
+      'brands_id',
+      'models_id',
+      'versions_id',
+      'price',
+      'description',
+      'created_at',
+    ];
+  }
 
   findById(id: string): Promise<Partial<Cars>[]> {
     return this.db.one(

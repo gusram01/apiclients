@@ -1,12 +1,63 @@
-import { Request } from 'express';
 import { IDatabase, IMain } from 'pg-promise';
 import { UsersCustomers } from '../models/users_customers';
 import { MyConditions } from '.';
+import { Repository } from './repository';
 
-export class UsersCustomersRepository {
-  private columns = ['_id', 'users_id', 'customers_id'];
-  private table = 'users_customers';
-  constructor(private db: IDatabase<any>, private pgp: IMain) {}
+export class UsersCustomersRepository extends Repository {
+  protected columns: string[];
+
+  constructor(db: IDatabase<any>, pgp: IMain) {
+    super(db, pgp, 'users_customers');
+    this.columns = ['_id', 'users_id', 'customers_id'];
+  }
+  customersByUser(user_id: string, query?: MyConditions) {
+    let str = '';
+
+    if (query && Object.keys(query).length > 0) {
+      str = `AND ${Object.keys(query)
+        .map((key) => {
+          return key.includes('active')
+            ? 'customers.' + key + ' = $<' + key + '>'
+            : 'customers.' + key + " LIKE '%" + query[key] + "%'";
+        })
+        .join(' AND ')}`;
+    }
+    return this.db.manyOrNone(
+      `SELECT ${this.table}._id, users._id as userID, 
+       users.email as username,
+       customers._id as clientID,
+       customers.firstname as firstname,
+       customers.lastname as lastname,
+       customers.curp as CURP,
+       customers.mobile as mobile,
+       customers.email as email
+       FROM ${this.table}
+       RIGHT JOIN users ON ${this.table}.users_id = users._id
+       RIGHT JOIN customers ON ${this.table}.customers_id = customers._id
+       WHERE ${this.table}.users_id = $<user_id>
+       ${str}`,
+      !query ? { user_id } : { user_id, ...query }
+    );
+  }
+  customersById(user_id: string, client_id: string) {
+    return this.db.manyOrNone(
+      `SELECT ${this.table}._id, users._id as userID, 
+       users.email as username,
+       customers._id as clientID,
+       customers.firstname as firstname,
+       customers.lastname as lastname,
+       customers.curp as CURP,
+       customers.mobile as mobile,
+       customers.email as email
+       FROM ${this.table}
+       RIGHT JOIN users ON ${this.table}.users_id = users._id
+       RIGHT JOIN customers ON ${this.table}.customers_id = customers._id
+       WHERE ${this.table}.users_id = $<user_id>
+       AND ${this.table}.customers_id = $<client_id>
+       AND customers.active = true`,
+      { user_id, client_id }
+    );
+  }
 
   find(query?: MyConditions): Promise<Partial<UsersCustomers>[]> {
     let str = '';
@@ -68,11 +119,4 @@ export class UsersCustomersRepository {
   //     [users_id, customers_id, id]
   //   );
   // }
-
-  deleteById(id: string): Promise<Partial<UsersCustomers> | null> {
-    return this.db.one(
-      `DELETE FROM ${this.table} WHERE _id = $1 RETURNING _id`,
-      id
-    );
-  }
 }

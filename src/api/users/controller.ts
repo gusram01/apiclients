@@ -4,11 +4,9 @@ import { ErrorResponse } from '../../utils/ErrorResponse';
 import { encrypter, getToken } from '../../utils/utilities';
 
 const Controller = (db: ExtendedProtocol) => {
-  const table = 'users';
-
   const some = async (req: Request) => {
     try {
-      const rows = await db.find(table, { ...req.query, active: true });
+      const rows = await db.users.find({ ...req.query, active: true });
       if (!rows) {
         throw new ErrorResponse(404, 'Data not found');
       }
@@ -21,7 +19,7 @@ const Controller = (db: ExtendedProtocol) => {
   const findById = async (req: Request) => {
     const _id = req.params.id;
     try {
-      const rows = await db.find(table, { active: true, _id });
+      const rows = await db.users.find({ active: true, _id });
       if (!rows || rows.length === 0) {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
@@ -43,7 +41,7 @@ const Controller = (db: ExtendedProtocol) => {
       roles_id: 1,
     };
     try {
-      const row = await db.create(table, newUser, ['_id', 'roles_id', 'email']);
+      const row = await db.users.create(newUser);
       if (!row) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -66,7 +64,7 @@ const Controller = (db: ExtendedProtocol) => {
     delete updatedData.created_at;
 
     try {
-      const rows = await db.update(table, updatedData, id);
+      const rows = await db.users.update(updatedData, id);
       if (!rows) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -79,7 +77,7 @@ const Controller = (db: ExtendedProtocol) => {
   const deleteById = async (req: Request) => {
     const _id = req.params.id;
     try {
-      const user = await db.find(table, { active: true, _id });
+      const user = await db.users.find({ active: true, _id });
       if (!user) {
         throw new ErrorResponse(404, 'Id Not Found');
       }
@@ -87,10 +85,10 @@ const Controller = (db: ExtendedProtocol) => {
       const deleteUser = {
         active: false,
         updated_at: 'now()',
-        email_e: user.email,
+        email_e: user[0].email,
         email: null,
       };
-      const rows = await db.update(table, deleteUser, _id);
+      const rows = await db.users.update(deleteUser, _id);
       if (!rows) {
         throw new ErrorResponse(
           500,

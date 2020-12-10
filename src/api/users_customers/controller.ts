@@ -3,8 +3,6 @@ import { ExtendedProtocol } from '../../store/database';
 import { ErrorResponse } from '../../utils/ErrorResponse';
 
 const Controller = (db: ExtendedProtocol) => {
-  const table = 'cars_customers';
-
   const some = async (req: Request) => {
     const data = { ...req.query } as any;
     try {
@@ -35,7 +33,7 @@ const Controller = (db: ExtendedProtocol) => {
     const { _id, ...users_customers } = req.body;
 
     try {
-      const row = await db.create(table, users_customers);
+      const row = await db.users_customers.create(users_customers);
       if (!row) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -56,7 +54,7 @@ const Controller = (db: ExtendedProtocol) => {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
 
-      const rows = await db.update(table, updatedData, _id);
+      const rows = await db.users_customers.update(updatedData, _id);
       if (!rows) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -75,7 +73,7 @@ const Controller = (db: ExtendedProtocol) => {
         throw new ErrorResponse(404, `ID IS NOT CORRECT: \"${_id}\"`);
       }
 
-      const row = await db.users_customers.deleteById(_id);
+      const row = await db.users_customers.destroy(_id);
       if (!row) {
         throw new ErrorResponse(
           500,

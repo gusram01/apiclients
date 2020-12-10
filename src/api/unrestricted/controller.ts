@@ -8,10 +8,7 @@ import { transporter } from '../../mailer/mail';
 const Controller = (db: ExtendedProtocol) => {
   const roles = async (req: Request) => {
     try {
-      const rows = await db.find('roles', { active: true }, [
-        '_id',
-        'description',
-      ]);
+      const rows = await db.roles.find({ active: true });
       if (!rows) {
         throw new ErrorResponse(404, 'Data not found');
       }
@@ -29,28 +26,20 @@ const Controller = (db: ExtendedProtocol) => {
     }
 
     try {
-      const rows = await db.find('users', { active: true, email }, [
-        '_id',
-        'email',
-        'roles_id',
-        'password',
-      ]);
+      const rows = await db.users.findByEmail(email);
+      console.log(rows);
       if (!rows || rows.length === 0) {
         throw new ErrorResponse(400, 'Incorrect email/password');
       }
 
-      const correctPass = await bcrypt.compare(password, rows[0].password);
+      const correctPass = await bcrypt.compare(password, rows.password);
       if (!correctPass) {
         throw new ErrorResponse(400, 'Incorrect email/password');
       }
 
       return {
-        token: getToken(
-          rows[0]._id!,
-          rows[0].email!,
-          rows[0].roles_id!.toString()
-        ),
-        id: rows[0]._id,
+        token: getToken(rows._id!, rows.email!, rows.roles_id!.toString()),
+        id: rows._id,
       };
     } catch (error) {
       throw new ErrorResponse(error.statusCode || 400, error.message);
@@ -65,11 +54,7 @@ const Controller = (db: ExtendedProtocol) => {
       roles_id: 1,
     };
     try {
-      const row = await db.create('users', newUser, [
-        '_id',
-        'roles_id',
-        'email',
-      ]);
+      const row = await db.users.create(newUser);
       if (!row) {
         throw new ErrorResponse(400, 'Please send the correct info');
       }
@@ -102,7 +87,6 @@ const Controller = (db: ExtendedProtocol) => {
 
   const isValid = async (req: Request) => {
     const item = req.params as { key: string; value: string };
-    console.log(item);
     try {
       const flag = await db.isValid(item);
       if (!flag) {
