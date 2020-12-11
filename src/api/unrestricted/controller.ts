@@ -27,7 +27,6 @@ const Controller = (db: ExtendedProtocol) => {
 
     try {
       const rows = await db.users.findByEmail(email);
-      console.log(rows);
       if (!rows || rows.length === 0) {
         throw new ErrorResponse(400, 'Incorrect email/password');
       }

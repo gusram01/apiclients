@@ -10,7 +10,7 @@ const Controller = (db: ExtendedProtocol) => {
         ...req.query,
         active: true,
       });
-      if (!rows) {
+      if (!rows || rows.length === 0) {
         throw new ErrorResponse(404, 'Data not found');
       }
 
