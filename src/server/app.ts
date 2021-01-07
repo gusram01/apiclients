@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import cookieParser from 'cookie-parser';
 import swaggerUI from 'swagger-ui-express';
 import router from './index.routes';
 import { errorHandler } from '../network/errorResponse';
@@ -65,7 +64,6 @@ const swaggerDoc = require('../swagger.json');
 app.use(helmet());
 app.use(express.json());
 app.use(cors());
-app.use(cookieParser());
 
 // Routes
 app.use('/api', router);
