@@ -35,7 +35,7 @@
     "nodemailer": "^6.4.16",
     "pg": "^8.4.1",
     "pg-promise": "^10.7.1",
-    "swagger-ui-express": "^4.1.5"
+    "swagger-ui-express": "^4.2.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
